@@ -1,3 +1,3 @@
-# Phaser 3 Typescript Boilerplate
+# Horse Punch Out (Temporary Name)
 
-- Based on Ourcade's boilerplate, with a few additional modifications to support DOM element UI out of the box, as well as some package.json version configurations to support easy deployment with Netlify
+Project for the Github Game-off 2022 Game Jam on itch.io. Based around the theme "Beating a dead horse". You play as a dead horse that was shot after breaking its leg. You have come back to life through some Frankenstein experimentation and have come to take revenge on your owners
