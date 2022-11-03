@@ -5,5 +5,7 @@ Project for the Github Game-off 2022 Game Jam on itch.io. Based around the theme
 ## Controls
 
 A - Dodge Left
+
 W - Dodge Right
+
 Space - Punch (alternates automatically)
