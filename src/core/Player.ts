@@ -1,11 +1,5 @@
 import Game from '~/scenes/Game'
-
-export enum Direction {
-  RIGHT = 'RIGHT',
-  LEFT = 'LEFT',
-  NONE = 'NONE',
-}
-
+import { Direction } from '~/core/Constants'
 export interface PlayerConfig {
   position: {
     x: number
@@ -100,12 +94,14 @@ export class Player {
       },
       y: `+=${Math.abs(bodyTranslatePos)}`,
       x: `+=${bodyTranslatePos}`,
+      ease: 'Cubic',
       duration: 250,
       yoyo: true,
     })
     this.game.tweens.add({
       targets: [this.leftFist, this.rightFist],
       x: `+=${fistTranslatePos}`,
+      ease: 'Cubic.easeInOut',
       duration: 250,
       yoyo: true,
       onComplete: () => {
