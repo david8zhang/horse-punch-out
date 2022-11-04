@@ -1,7 +1,5 @@
 import Game from '~/scenes/Game'
 import { Direction } from '~/core/Constants'
-import { Time } from 'phaser'
-
 export interface EnemyConfig {
   position: {
     x: number
