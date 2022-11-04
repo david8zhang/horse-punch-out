@@ -1,11 +1,13 @@
 import Phaser from 'phaser'
 import { Direction, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
-import { Enemy } from '~/core/Enemy'
+import { Enemy, EnemyState } from '~/core/Enemy'
+import { BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
 
 export default class Game extends Phaser.Scene {
   public player!: Player
   public enemy!: Enemy
+  public beatTracker!: BeatTracker
 
   constructor() {
     super('game')
@@ -18,6 +20,10 @@ export default class Game extends Phaser.Scene {
         y: WINDOW_HEIGHT - 50,
       },
     })
+
+    const bpm = 50
+    this.beatTracker = new BeatTracker(this, bpm)
+
     this.enemy = new Enemy(this, {
       position: {
         x: WINDOW_WIDTH / 2,
@@ -34,9 +40,13 @@ export default class Game extends Phaser.Scene {
         console.log('u got punched')
       }
     })
-  }
-
-  update(_time, delta) {
-    this.enemy.update(delta)
+    this.beatTracker.addBeatListener(() => {
+      if (this.enemy.currState === EnemyState.WIND_UP_COMPLETE) {
+        this.enemy.startPunch()
+      } else {
+        this.enemy.windUp(Direction.LEFT)
+      }
+    })
+    this.beatTracker.start()
   }
 }

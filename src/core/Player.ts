@@ -1,5 +1,7 @@
 import Game from '~/scenes/Game'
 import { Direction } from '~/core/Constants'
+import { SORT_ORDER } from './Constants'
+
 export interface PlayerConfig {
   position: {
     x: number
@@ -24,25 +26,31 @@ export class Player {
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
     const { position } = config
-    this.body = this.game.add.rectangle(
-      position.x,
-      position.y,
-      Player.BODY_WIDTH,
-      Player.BODY_HEIGHT,
-      0xffdbac
-    )
-    this.rightFist = this.game.add.circle(
-      position.x + this.body.width,
-      position.y,
-      Player.FIST_RADIUS,
-      0x00ff00
-    )
-    this.leftFist = this.game.add.circle(
-      position.x - this.body.width,
-      position.y,
-      Player.FIST_RADIUS,
-      0x00ff00
-    )
+    this.body = this.game.add
+      .rectangle(
+        position.x,
+        position.y,
+        Player.BODY_WIDTH,
+        Player.BODY_HEIGHT,
+        0xffdbac
+      )
+      .setDepth(SORT_ORDER.body)
+    this.rightFist = this.game.add
+      .circle(
+        position.x + this.body.width,
+        position.y,
+        Player.FIST_RADIUS,
+        0x00ff00
+      )
+      .setDepth(SORT_ORDER.fist)
+    this.leftFist = this.game.add
+      .circle(
+        position.x - this.body.width,
+        position.y,
+        Player.FIST_RADIUS,
+        0x00ff00
+      )
+      .setDepth(SORT_ORDER.fist)
     this.initKeyPressListener()
   }
 
@@ -70,7 +78,10 @@ export class Player {
   }
 
   dodge(direction: Direction) {
-    if (this.currDodgeDirection !== Direction.NONE || this.currPunchDirection !== Direction.NONE) {
+    if (
+      this.currDodgeDirection !== Direction.NONE ||
+      this.currPunchDirection !== Direction.NONE
+    ) {
       return
     }
     this.currDodgeDirection = direction
@@ -111,9 +122,13 @@ export class Player {
   }
 
   punch(direction: Direction) {
-    if (this.currPunchDirection !== Direction.NONE || this.currDodgeDirection !== Direction.NONE) {
+    if (
+      this.currPunchDirection !== Direction.NONE ||
+      this.currDodgeDirection !== Direction.NONE
+    ) {
       return
     }
+
     this.prevPunchDirection = direction
     this.currPunchDirection = direction
     const fistToMove =
@@ -126,14 +141,14 @@ export class Player {
         from: 0,
         to: bodyAngle,
       },
-      duration: 150,
+      duration: 100,
       yoyo: true,
     })
     this.game.tweens.add({
       targets: [fistToMove],
       y: '-=300',
       x: `+=${bodyPos}`,
-      duration: 150,
+      duration: 100,
       yoyo: true,
       onComplete: () => {
         this.currPunchDirection = Direction.NONE
