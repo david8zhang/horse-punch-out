@@ -74,7 +74,7 @@ export class Player {
   }
 
   dodge(direction: Direction) {
-    if (this.currDodgeDirection !== Direction.NONE) {
+    if (this.currDodgeDirection !== Direction.NONE || this.currPunchDirection !== Direction.NONE) {
       return
     }
     this.currDodgeDirection = direction
@@ -113,7 +113,7 @@ export class Player {
   }
 
   punch(direction: Direction) {
-    if (this.currPunchDirection !== Direction.NONE) {
+    if (this.currPunchDirection !== Direction.NONE || this.currDodgeDirection !== Direction.NONE) {
       return
     }
     this.prevPunchDirection = direction
