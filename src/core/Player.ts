@@ -65,7 +65,9 @@ export class Player {
         }
         case 'Space': {
           const newPunchDirection =
-            this.prevPunchDirection === Direction.LEFT ? Direction.RIGHT : Direction.LEFT
+            this.prevPunchDirection === Direction.LEFT
+              ? Direction.RIGHT
+              : Direction.LEFT
           this.punch(newPunchDirection)
           break
         }
@@ -118,7 +120,8 @@ export class Player {
     }
     this.prevPunchDirection = direction
     this.currPunchDirection = direction
-    const fistToMove = direction === Direction.LEFT ? this.leftFist : this.rightFist
+    const fistToMove =
+      direction === Direction.LEFT ? this.leftFist : this.rightFist
     const bodyAngle = direction === Direction.LEFT ? 10 : -10
     const bodyPos = direction === Direction.LEFT ? 50 : -50
     this.game.tweens.add({
