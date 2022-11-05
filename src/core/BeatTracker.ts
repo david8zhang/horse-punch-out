@@ -149,7 +149,7 @@ export class BeatTracker {
     } else {
       const diff = this.leftBeatCircle.x - this.middleCircle.x
       console.log(diff)
-      return diff > -5
+      return diff > -10
     }
   }
 
