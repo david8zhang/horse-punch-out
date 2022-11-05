@@ -13,6 +13,7 @@ export class Player {
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
+  public static readonly MAX_HEALTH = 3
 
   private game: Game
   private body: Phaser.GameObjects.Rectangle
@@ -22,6 +23,9 @@ export class Player {
   public currDodgeDirection: Direction = Direction.NONE
   public currPunchDirection: Direction = Direction.NONE
   public prevPunchDirection: Direction = Direction.LEFT
+  public health: number = Player.MAX_HEALTH
+
+  public onDamaged: Array<() => void> = []
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
@@ -160,5 +164,10 @@ export class Player {
         this.currPunchDirection = Direction.NONE
       },
     })
+  }
+
+  damage() {
+    this.health--
+    this.onDamaged.forEach((handler) => handler())
   }
 }
