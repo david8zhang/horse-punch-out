@@ -17,7 +17,6 @@ export enum EnemyState {
 }
 
 export class Enemy {
-  private static readonly WIND_UP_TIME = 1000
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
@@ -35,6 +34,9 @@ export class Enemy {
   private body: Phaser.GameObjects.Rectangle
   private rightFist: Phaser.GameObjects.Arc
   private leftFist: Phaser.GameObjects.Arc
+  public health: number = 20
+
+  public onDamaged: Array<() => void> = []
 
   constructor(game: Game, config: EnemyConfig) {
     this.game = game
@@ -142,5 +144,10 @@ export class Enemy {
         Phaser.Math.Between(0, 1) === 0 ? Direction.LEFT : Direction.RIGHT
       this.windUp(randDirection)
     }
+  }
+
+  damage() {
+    this.health--
+    this.onDamaged.forEach((handler) => handler())
   }
 }
