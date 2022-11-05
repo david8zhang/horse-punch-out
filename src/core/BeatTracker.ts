@@ -8,7 +8,7 @@ export interface BeatListenerConfig {
 }
 
 export class BeatTracker {
-  private bpm: number = 100
+  private bpm: number
   private game: Game
   private background: Phaser.GameObjects.Rectangle
   private beatEvent!: Phaser.Time.TimerEvent
@@ -82,6 +82,7 @@ export class BeatTracker {
     target: Phaser.GameObjects.Arc,
     tweenDistance: number,
     duration: number,
+    fade: boolean = false,
     onRepeat?: Function
   ) {
     const newTween = this.game.tweens.add({
@@ -95,6 +96,18 @@ export class BeatTracker {
         }
       },
     })
+    if (fade) {
+      target.setAlpha(0)
+      this.game.tweens.add({
+        targets: [target],
+        duration,
+        alpha: {
+          from: 0,
+          to: 1,
+        },
+        repeat: -1,
+      })
+    }
     this.beatTrackerUITweens.push(newTween)
     newTween.paused = true
     return newTween
@@ -125,22 +138,28 @@ export class BeatTracker {
     const delayBetweenBeats = 60000 / this.bpm
     this.addBeatUITween(this.leftBeatCircle, 50, delayBetweenBeats)
     this.addBeatUITween(this.rightBeatCircle, -50, delayBetweenBeats)
-    this.addBeatUITween(outerLeftBeatCircle, 50, delayBetweenBeats)
-    this.addBeatUITween(outerRightBeatCircle, -50, delayBetweenBeats, () => {
-      this.middleCircle.setVisible(true).setAlpha(1)
-      this.game.tweens.add({
-        delay: 50,
-        alpha: {
-          from: 1,
-          to: 0,
-        },
-        duration: 100,
-        targets: [this.middleCircle],
-        onComplete: () => {
-          this.middleCircle.setVisible(false)
-        },
-      })
-    })
+    this.addBeatUITween(outerLeftBeatCircle, 50, delayBetweenBeats, true)
+    this.addBeatUITween(
+      outerRightBeatCircle,
+      -50,
+      delayBetweenBeats,
+      true,
+      () => {
+        this.middleCircle.setVisible(true).setAlpha(1)
+        this.game.tweens.add({
+          delay: 50,
+          alpha: {
+            from: 1,
+            to: 0,
+          },
+          duration: 100,
+          targets: [this.middleCircle],
+          onComplete: () => {
+            this.middleCircle.setVisible(false)
+          },
+        })
+      }
+    )
   }
 
   get isOnBeat() {
