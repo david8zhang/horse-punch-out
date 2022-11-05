@@ -125,12 +125,22 @@ export class Enemy {
           ? this.RIGHT_FIST_POSITION
           : this.LEFT_FIST_POSITION,
       y: this.BODY_POSITION.y,
-      duration: 200, // punch recovery time
+      duration: 150, // punch recovery time
       ease: 'Quint.easeInOut',
       onComplete: () => {
         this.currState = EnemyState.IDLE
         this.punchDirection = Direction.NONE
       },
     })
+  }
+
+  onBeat() {
+    if (this.currState === EnemyState.WIND_UP_COMPLETE) {
+      this.startPunch()
+    } else {
+      const randDirection =
+        Phaser.Math.Between(0, 1) === 0 ? Direction.LEFT : Direction.RIGHT
+      this.windUp(randDirection)
+    }
   }
 }

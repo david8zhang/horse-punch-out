@@ -1,13 +1,34 @@
 import Phaser from 'phaser'
-import { Direction, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
+import {
+  Direction,
+  SORT_ORDER,
+  WINDOW_HEIGHT,
+  WINDOW_WIDTH,
+} from '~/core/Constants'
 import { Enemy, EnemyState } from '~/core/Enemy'
 import { BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
+
+export enum AttackPhase {
+  PLAYER,
+  ENEMY,
+}
 
 export default class Game extends Phaser.Scene {
   public player!: Player
   public enemy!: Enemy
   public beatTracker!: BeatTracker
+  public currAttackPhase: AttackPhase = AttackPhase.PLAYER
+
+  public bpm = 100
+
+  // track number of enemy attacks before player can attack
+  public numEnemyActionsBeforeSwitch: number = Phaser.Math.Between(5, 10)
+  public currEnemyActions: number = -3 // Start it at negative to give player time to adjust
+
+  // track number of player attacks before enemy can attack
+  public numPlayerActionsBeforeSwitch: number = 10
+  public currPlayerActions: number = -3
 
   constructor() {
     super('game')
@@ -20,10 +41,7 @@ export default class Game extends Phaser.Scene {
         y: WINDOW_HEIGHT - 50,
       },
     })
-
-    const bpm = 50
-    this.beatTracker = new BeatTracker(this, bpm)
-
+    this.beatTracker = new BeatTracker(this, this.bpm)
     this.enemy = new Enemy(this, {
       position: {
         x: WINDOW_WIDTH / 2,
@@ -34,19 +52,102 @@ export default class Game extends Phaser.Scene {
       // TODO: put this logic somewhere else
       if (this.player.currDodgeDirection == punchDirection) {
         // player successfully dodged
-        console.log('damn, you doged it')
       } else {
         // got punched
-        console.log('u got punched')
       }
     })
     this.beatTracker.addBeatListener(() => {
-      if (this.enemy.currState === EnemyState.WIND_UP_COMPLETE) {
-        this.enemy.startPunch()
-      } else {
-        this.enemy.windUp(Direction.LEFT)
-      }
+      this.handleOnBeatForAttackPhase()
     })
     this.beatTracker.start()
+    this.startPhaseSwitchCountdown()
+  }
+
+  handleOnBeatForAttackPhase() {
+    if (this.currAttackPhase === AttackPhase.ENEMY) {
+      if (this.currEnemyActions >= this.numEnemyActionsBeforeSwitch) {
+        // Always end enemy attack string with a punch
+        if (this.enemy.currState === EnemyState.WIND_UP_COMPLETE) {
+          this.enemy.onBeat()
+        } else {
+          this.switchPhase()
+        }
+      } else {
+        if (this.currEnemyActions >= 0) {
+          this.enemy.onBeat()
+        }
+        this.currEnemyActions++
+      }
+    } else {
+      if (this.currPlayerActions + 1 == this.numPlayerActionsBeforeSwitch) {
+        this.switchPhase()
+      } else {
+        this.currPlayerActions++
+      }
+    }
+  }
+
+  switchPhase() {
+    if (this.currAttackPhase === AttackPhase.ENEMY) {
+      this.currPlayerActions = -3
+      this.currAttackPhase = AttackPhase.PLAYER
+    } else {
+      this.currEnemyActions = -3
+      this.numEnemyActionsBeforeSwitch = Phaser.Math.Between(5, 10)
+      this.currAttackPhase = AttackPhase.ENEMY
+    }
+    this.beatTracker.handlePhaseSwitch(this.currAttackPhase)
+    this.startPhaseSwitchCountdown()
+  }
+
+  canPlayerAttack() {
+    return (
+      this.currAttackPhase === AttackPhase.PLAYER && this.currPlayerActions >= 0
+    )
+  }
+
+  startPhaseSwitchCountdown() {
+    const duration = 60000 / this.bpm
+    let countdown = 3
+    const countdownText = this.add
+      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, `${countdown}`)
+      .setStyle({
+        fontSize: '30px',
+        color: '#ffffff',
+      })
+      .setDepth(SORT_ORDER.ui)
+    countdownText.setPosition(
+      WINDOW_WIDTH / 2 - countdownText.displayWidth / 2,
+      WINDOW_HEIGHT / 2 - countdownText.displayHeight / 2
+    )
+    this.tweens.add({
+      targets: [countdownText],
+      alpha: {
+        from: 1,
+        to: 0,
+      },
+      duration: duration,
+      repeat: 3,
+      onRepeat: () => {
+        countdown--
+        let text = `${countdown}`
+        if (countdown === 0) {
+          text =
+            this.currAttackPhase === AttackPhase.PLAYER
+              ? 'Player Attack!'
+              : 'Enemy Attack!'
+        }
+        countdownText
+          .setText(text)
+          .setAlpha(1)
+          .setPosition(
+            WINDOW_WIDTH / 2 - countdownText.displayWidth / 2,
+            WINDOW_HEIGHT / 2 - countdownText.displayHeight / 2
+          )
+      },
+      onComplete: () => {
+        countdownText.destroy()
+      },
+    })
   }
 }

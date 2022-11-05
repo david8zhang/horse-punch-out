@@ -66,11 +66,14 @@ export class Player {
           break
         }
         case 'Space': {
-          const newPunchDirection =
-            this.prevPunchDirection === Direction.LEFT
-              ? Direction.RIGHT
-              : Direction.LEFT
-          this.punch(newPunchDirection)
+          if (this.game.canPlayerAttack()) {
+            const newPunchDirection =
+              this.prevPunchDirection === Direction.LEFT
+                ? Direction.RIGHT
+                : Direction.LEFT
+            this.punch(newPunchDirection)
+          }
+
           break
         }
       }
@@ -106,14 +109,14 @@ export class Player {
       y: `+=${Math.abs(bodyTranslatePos)}`,
       x: `+=${bodyTranslatePos}`,
       ease: 'Cubic',
-      duration: 250,
+      duration: 200,
       yoyo: true,
     })
     this.game.tweens.add({
       targets: [this.leftFist, this.rightFist],
       x: `+=${fistTranslatePos}`,
       ease: 'Cubic.easeInOut',
-      duration: 250,
+      duration: 200,
       yoyo: true,
       onComplete: () => {
         this.currDodgeDirection = Direction.NONE
@@ -127,6 +130,9 @@ export class Player {
       this.currDodgeDirection !== Direction.NONE
     ) {
       return
+    }
+    if (this.game.beatTracker.isOnBeat) {
+      this.game.cameras.main.shake(150, 0.005)
     }
 
     this.prevPunchDirection = direction
