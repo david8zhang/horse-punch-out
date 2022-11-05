@@ -1,5 +1,6 @@
 import Game from '~/scenes/Game'
 import { Direction } from '~/core/Constants'
+import { Time } from 'phaser'
 
 export interface EnemyConfig {
   position: {
@@ -9,6 +10,7 @@ export interface EnemyConfig {
 }
 
 export class Enemy {
+  private static readonly WIND_UP_TIME = 1000
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
@@ -17,11 +19,17 @@ export class Enemy {
   private readonly BODY_POSITION: { x: number; y: number }
 
   public onPunch: Array<(dir: Direction) => void> = []
+
+  // renderer
   private game: Game
   private body: Phaser.GameObjects.Rectangle
   private rightFist: Phaser.GameObjects.Arc
   private leftFist: Phaser.GameObjects.Arc
+
+  // state
   private punchDirection: Direction = Direction.NONE
+  private punchTimer = 0
+  private windUpTimer = 0
 
   constructor(game: Game, config: EnemyConfig) {
     this.game = game
@@ -48,34 +56,34 @@ export class Enemy {
       Enemy.FIST_RADIUS,
       0xff0000
     )
-    this.initKeyPressListener()
   }
 
-  initKeyPressListener() {
-    // TODO: Make this fire based on a timer
-    this.game.input.keyboard.on('keydown', (e) => {
-      switch (e.code) {
-        case 'ArrowLeft': {
-          this.startPunch(Direction.LEFT)
-          break
-        }
-        case 'ArrowRight': {
-          this.startPunch(Direction.RIGHT)
-          break
-        }
-      }
-    })
-  }
-
-  startPunch(direction: Direction) {
+  windUp(direction: Direction) {
+    // Don't wind up a new punch if we're already punching
     if (this.punchDirection !== Direction.NONE) {
       return
     }
     this.punchDirection = direction
     const fistToMove =
       direction === Direction.LEFT ? this.leftFist : this.rightFist
-    const bodyAngle = direction === Direction.LEFT ? -10 : 10
-    const bodyPos = direction === Direction.LEFT ? 150 : -150
+    this.game.tweens.add({
+      targets: [fistToMove],
+      y: '-= 50',
+      ease: 'Quad.easeInOut',
+      duration: Enemy.WIND_UP_TIME / 2,
+    })
+    this.windUpTimer = Enemy.WIND_UP_TIME / 2
+  }
+
+  startPunch() {
+    // We need to wind up a punch first before starting it
+    if (this.punchDirection === Direction.NONE) {
+      return
+    }
+    const fistToMove =
+      this.punchDirection === Direction.LEFT ? this.leftFist : this.rightFist
+    const bodyAngle = this.punchDirection === Direction.LEFT ? -10 : 10
+    const bodyPos = this.punchDirection === Direction.LEFT ? 150 : -150
     this.game.tweens.add({
       targets: [this.body],
       angle: {
@@ -87,20 +95,22 @@ export class Enemy {
     })
     this.game.tweens.add({
       targets: [fistToMove],
-      y: '+=300',
+      y: '+=400',
       x: `+=${bodyPos}`,
       ease: 'Quint.easeIn',
       duration: 150, // this is like an "grace period" (in addition to the wind up) giving players time to react to the punch animation, larger number = more lenient
       onComplete: () => {
         // punch when fist reaches end
-        this.punch(direction, fistToMove)
+        this.punch()
       },
     })
   }
 
-  punch(direction: Direction, fistToMove: Phaser.GameObjects.Arc) {
+  punch() {
+    const fistToMove =
+      this.punchDirection === Direction.LEFT ? this.leftFist : this.rightFist
     // broadcast punch
-    this.onPunch.forEach((handler) => handler(direction))
+    this.onPunch.forEach((handler) => handler(this.punchDirection))
     this.game.tweens.add({
       targets: [fistToMove],
       x:
@@ -108,11 +118,26 @@ export class Enemy {
           ? this.RIGHT_FIST_POSITION
           : this.LEFT_FIST_POSITION,
       y: this.BODY_POSITION.y,
-      duration: 300,
+      duration: 300, // punch recovery time
       ease: 'Quint.easeInOut',
       onComplete: () => {
         this.punchDirection = Direction.NONE
       },
     })
+  }
+
+  update(delta) {
+    this.punchTimer -= delta
+    if (this.punchTimer <= 0) {
+      this.punchTimer = Math.random() * 2500 + 500 // punches are anywhere between 0.5 and 3 seconds
+      this.windUp(Math.random() < 0.5 ? Direction.LEFT : Direction.RIGHT)
+    }
+    // TODO: for now, wind up will just last 500 ms, but later this should be set by beat map
+    if (this.windUpTimer > 0) {
+      this.windUpTimer -= delta
+      if (this.windUpTimer <= 0) {
+        this.startPunch()
+      }
+    }
   }
 }
