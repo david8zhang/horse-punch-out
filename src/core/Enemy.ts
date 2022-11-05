@@ -17,10 +17,10 @@ export enum EnemyState {
 }
 
 export class Enemy {
-  private static readonly WIND_UP_TIME = 1000
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
+  private static readonly PUNCH_DURATION = 50
   private readonly RIGHT_FIST_POSITION: number
   private readonly LEFT_FIST_POSITION: number
   private readonly BODY_POSITION: { x: number; y: number }
@@ -89,7 +89,6 @@ export class Enemy {
       this.punchDirection === Direction.LEFT ? this.leftFist : this.rightFist
     const bodyAngle = this.punchDirection === Direction.LEFT ? -10 : 10
     const bodyPos = this.punchDirection === Direction.LEFT ? 150 : -150
-    const punchDuration = 50
 
     this.game.tweens.add({
       targets: [this.body],
@@ -97,7 +96,7 @@ export class Enemy {
         from: 0,
         to: bodyAngle,
       },
-      duration: punchDuration,
+      duration: Enemy.PUNCH_DURATION,
       yoyo: true,
     })
     this.game.tweens.add({
@@ -105,7 +104,7 @@ export class Enemy {
       y: '+=400',
       x: `+=${bodyPos}`,
       ease: 'Quint.easeIn',
-      duration: punchDuration, // this is like an "grace period" (in addition to the wind up) giving players time to react to the punch animation, larger number = more lenient
+      duration: Enemy.PUNCH_DURATION, // this is like an "grace period" (in addition to the wind up) giving players time to react to the punch animation, larger number = more lenient
       onComplete: () => {
         // punch when fist reaches end
         this.punch()
