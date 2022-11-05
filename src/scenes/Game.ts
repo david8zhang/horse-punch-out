@@ -35,4 +35,8 @@ export default class Game extends Phaser.Scene {
       }
     })
   }
+
+  update(_time, delta) {
+    this.enemy.update(delta)
+  }
 }
