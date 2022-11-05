@@ -8,6 +8,7 @@ import {
 import { Enemy, EnemyState } from '~/core/Enemy'
 import { BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
+import { Healthbar } from '~/core/Healthbar'
 
 export enum AttackPhase {
   PLAYER,
@@ -54,6 +55,11 @@ export default class Game extends Phaser.Scene {
         // player successfully dodged
       } else {
         // got punched
+        this.player.damage()
+        this.cameras.main.shake(150, 0.005)
+        if (this.player.health <= 0) {
+          console.log('you lose')
+        }
       }
     })
     this.beatTracker.addBeatListener(() => {
@@ -61,6 +67,7 @@ export default class Game extends Phaser.Scene {
     })
     this.beatTracker.start()
     this.startPhaseSwitchCountdown()
+    new Healthbar(this, this.player)
   }
 
   handleOnBeatForAttackPhase() {
