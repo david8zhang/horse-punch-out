@@ -1,4 +1,4 @@
-import Game from '~/scenes/Game'
+import Game, { AttackPhase } from '~/scenes/Game'
 import { SORT_ORDER, WINDOW_HEIGHT, WINDOW_WIDTH } from './Constants'
 
 // Do something on each beat (with either +/- ms delay)
@@ -11,10 +11,13 @@ export class BeatTracker {
   private bpm: number = 100
   private game: Game
   private background: Phaser.GameObjects.Rectangle
+  private beatEvent!: Phaser.Time.TimerEvent
+  private beatTrackerUITweens: Phaser.Tweens.Tween[] = []
 
   public leftBeatCircle!: Phaser.GameObjects.Arc
   public rightBeatCircle!: Phaser.GameObjects.Arc
   public middleCircle!: Phaser.GameObjects.Arc
+  public allCircles: Phaser.GameObjects.Arc[] = []
 
   public beatListeners: Array<() => void> = []
 
@@ -28,39 +31,60 @@ export class BeatTracker {
         WINDOW_WIDTH,
         WINDOW_HEIGHT
       )
-      .setFillStyle(0xff0000)
+      .setFillStyle(
+        this.game.currAttackPhase === AttackPhase.PLAYER ? 0x00ff00 : 0xff0000
+      )
       .setAlpha(0.25)
       .setDepth(SORT_ORDER.background)
       .setVisible(false)
+    this.initBeatAndUI()
   }
 
   addBeatListener(beatListener: () => void) {
     this.beatListeners.push(beatListener)
   }
 
-  start() {
+  initBeatAndUI() {
     this.createBeatCircles()
     this.createBeatEvent()
   }
 
+  start() {
+    this.beatEvent.paused = false
+    this.beatTrackerUITweens.forEach((tween) => {
+      tween.resume()
+    })
+  }
+
+  handlePhaseSwitch(newAttackPhase: AttackPhase) {
+    const circleColor =
+      newAttackPhase === AttackPhase.ENEMY ? 0xff0000 : 0x00ff00
+    this.allCircles.forEach((circle) => {
+      circle.setStrokeStyle(2, circleColor)
+    })
+    this.middleCircle.setFillStyle(circleColor)
+    this.background.setFillStyle(circleColor)
+  }
+
   createBeatEvent() {
     const delayBetweenBeats = 60000 / this.bpm
-    this.game.time.addEvent({
+    this.beatEvent = this.game.time.addEvent({
       delay: delayBetweenBeats,
       callback: () => {
         this.onBeat()
       },
       repeat: -1,
     })
+    this.beatEvent.paused = true
   }
 
-  tweenBeatUI(
+  addBeatUITween(
     target: Phaser.GameObjects.Arc,
     tweenDistance: number,
     duration: number,
     onRepeat?: Function
   ) {
-    this.game.tweens.add({
+    const newTween = this.game.tweens.add({
       targets: [target],
       x: `+=${tweenDistance}`,
       duration,
@@ -71,35 +95,39 @@ export class BeatTracker {
         }
       },
     })
+    this.beatTrackerUITweens.push(newTween)
+    newTween.paused = true
+    return newTween
   }
 
+  createCircle(xOffset: number, yOffset: number, color: number) {
+    const circle = this.game.add
+      .circle(WINDOW_WIDTH / 2 + xOffset, WINDOW_HEIGHT / 2 + yOffset, 10)
+      .setDepth(SORT_ORDER.ui)
+      .setStrokeStyle(2, color)
+    this.allCircles.push(circle)
+    return circle
+  }
+
+  // Refactor this
   createBeatCircles() {
-    const midCircle = this.game.add
-      .circle(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 50, 10, 0xff0000)
+    const color =
+      this.game.currAttackPhase === AttackPhase.PLAYER ? 0x00ff00 : 0xff0000
+    this.middleCircle = this.game.add
+      .circle(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 50, 10, color)
       .setDepth(SORT_ORDER.ui)
       .setAlpha(0)
-    const innerLeftBeatCircle = this.game.add
-      .circle(WINDOW_WIDTH / 2 - 50, WINDOW_HEIGHT / 2 + 50, 10)
-      .setStrokeStyle(2, 0xff0000)
-      .setDepth(SORT_ORDER.ui)
-    const outerLeftBeatCircle = this.game.add
-      .circle(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 50, 10)
-      .setStrokeStyle(2, 0xff0000)
-    const innerRightBeatCircle = this.game.add
-      .circle(WINDOW_WIDTH / 2 + 50, WINDOW_HEIGHT / 2 + 50, 10)
-      .setStrokeStyle(2, 0xff0000)
-      .setDepth(SORT_ORDER.ui)
-    const outerRightBeatCircle = this.game.add
-      .circle(WINDOW_WIDTH / 2 + 100, WINDOW_HEIGHT / 2 + 50, 10)
-      .setStrokeStyle(2, 0xff0000)
-      .setDepth(SORT_ORDER.ui)
+    this.leftBeatCircle = this.createCircle(-50, 50, color)
+    this.rightBeatCircle = this.createCircle(50, 50, color)
+    const outerLeftBeatCircle = this.createCircle(-100, 50, color)
+    const outerRightBeatCircle = this.createCircle(100, 50, color)
 
     const delayBetweenBeats = 60000 / this.bpm
-    this.tweenBeatUI(innerLeftBeatCircle, 50, delayBetweenBeats)
-    this.tweenBeatUI(outerLeftBeatCircle, 50, delayBetweenBeats)
-    this.tweenBeatUI(innerRightBeatCircle, -50, delayBetweenBeats)
-    this.tweenBeatUI(outerRightBeatCircle, -50, delayBetweenBeats, () => {
-      midCircle.setVisible(true).setAlpha(1)
+    this.addBeatUITween(this.leftBeatCircle, 50, delayBetweenBeats)
+    this.addBeatUITween(this.rightBeatCircle, -50, delayBetweenBeats)
+    this.addBeatUITween(outerLeftBeatCircle, 50, delayBetweenBeats)
+    this.addBeatUITween(outerRightBeatCircle, -50, delayBetweenBeats, () => {
+      this.middleCircle.setVisible(true).setAlpha(1)
       this.game.tweens.add({
         delay: 50,
         alpha: {
@@ -107,19 +135,22 @@ export class BeatTracker {
           to: 0,
         },
         duration: 100,
-        targets: [midCircle],
+        targets: [this.middleCircle],
         onComplete: () => {
-          midCircle.setVisible(false)
+          this.middleCircle.setVisible(false)
         },
       })
     })
   }
 
   get isOnBeat() {
-    return (
-      Math.round(Math.abs(this.leftBeatCircle.x - this.middleCircle.x)) < 20 ||
-      this.middleCircle.visible
-    )
+    if (this.middleCircle.visible) {
+      return true
+    } else {
+      const diff = this.leftBeatCircle.x - this.middleCircle.x
+      console.log(diff)
+      return diff > -5
+    }
   }
 
   onBeat() {
@@ -127,22 +158,24 @@ export class BeatTracker {
       fn()
     })
 
-    const delayBetweenBeats = 60000 / this.bpm - 100
-    // Decrease the accuracy by 1 every 20ms
-    this.game.tweens.add({
-      targets: [this.background],
-      duration: delayBetweenBeats,
-      onStart: () => {
-        this.background.setVisible(true)
-      },
-      alpha: {
-        from: 0.25,
-        to: 0,
-      },
-      onComplete: () => {
-        this.background.setVisible(false)
-        this.background.setAlpha(0.5)
-      },
-    })
+    if (!this.beatEvent.paused) {
+      const delayBetweenBeats = 60000 / this.bpm - 100
+      // Decrease the accuracy by 1 every 20ms
+      this.game.tweens.add({
+        targets: [this.background],
+        duration: delayBetweenBeats,
+        onStart: () => {
+          this.background.setVisible(true)
+        },
+        alpha: {
+          from: 0.25,
+          to: 0,
+        },
+        onComplete: () => {
+          this.background.setVisible(false)
+          this.background.setAlpha(0.5)
+        },
+      })
+    }
   }
 }
