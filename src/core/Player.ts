@@ -137,6 +137,8 @@ export class Player {
     }
     if (this.game.beatTracker.isOnBeat) {
       this.game.cameras.main.shake(150, 0.005)
+      // TODO: put this logic in "game" or somewhere else
+      this.game.enemy.damage()
     }
 
     this.prevPunchDirection = direction

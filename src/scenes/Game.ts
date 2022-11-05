@@ -50,7 +50,7 @@ export default class Game extends Phaser.Scene {
       },
     })
     this.enemy.onPunch.push((punchDirection: Direction) => {
-      // TODO: put this logic somewhere else
+      // TODO: put this logic somewhere else (probably in player class)
       if (this.player.currDodgeDirection == punchDirection) {
         // player successfully dodged
       } else {
@@ -67,8 +67,35 @@ export default class Game extends Phaser.Scene {
     })
     this.beatTracker.start()
     this.startPhaseSwitchCountdown()
-    new Healthbar(this, this.player)
+
+    // create health bars
+    new Healthbar(
+      this,
+      {
+        position: {
+          x: WINDOW_WIDTH - Healthbar.LENGTH - 10,
+          y: WINDOW_HEIGHT - 30,
+        },
+        maxHealth: Player.MAX_HEALTH,
+      },
+      this.player,
+      this.player.onDamaged
+    )
+    new Healthbar(
+      this,
+      {
+        position: {
+          x: 60,
+          y: 30,
+        },
+        maxHealth: 20,
+      },
+      this.enemy,
+      this.enemy.onDamaged
+    )
   }
+  //   public static Y_POS = WINDOW_HEIGHT - 30
+  //   public static X_POS = WINDOW_WIDTH - Healthbar.LENGTH - 60
 
   handleOnBeatForAttackPhase() {
     if (this.currAttackPhase === AttackPhase.ENEMY) {

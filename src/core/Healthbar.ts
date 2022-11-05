@@ -2,39 +2,47 @@ import Game from '~/scenes/Game'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
 import { Player } from './Player'
 
+export interface HealthbarConfig {
+  maxHealth: number
+  position: {
+    x: number
+    y: number
+  }
+}
 export class Healthbar {
   private scene: Game
 
   public static LENGTH = 200
   public static WIDTH = 20
   public static MAX_HEALTH = 6
-  public static Y_POS = WINDOW_HEIGHT - 30
-  public static X_POS = WINDOW_WIDTH - Healthbar.LENGTH - 10
 
   private bar: Phaser.GameObjects.Graphics
-  private player: Player
+  private player: { health: number }
+  private config: HealthbarConfig
 
-  constructor(scene: Game, player: Player) {
+  constructor(
+    scene: Game,
+    config: HealthbarConfig,
+    player: { health: number },
+    onHealthChanged: Array<() => void>
+  ) {
     this.scene = scene
     this.player = player
+    this.config = config
 
     // Draw bar
     this.bar = new Phaser.GameObjects.Graphics(this.scene)
     this.bar.setDepth(1000)
     this.scene.add.existing(this.bar)
-    this.setupHealthEvents()
+    onHealthChanged.push(this.handleHealthDecreased.bind(this))
     this.draw()
 
     this.scene.add
-      .text(Healthbar.X_POS - 50, Healthbar.Y_POS, 'HP:', {
+      .text(config.position.x - 40, config.position.y, 'HP:', {
         fontSize: '16px',
         fontFamily: 'Daydream',
       })
       .setOrigin(0)
-  }
-
-  setupHealthEvents(): void {
-    this.player.onDamaged.push(this.handleHealthDecreased.bind(this))
   }
 
   handleHealthDecreased(): void {
@@ -42,14 +50,14 @@ export class Healthbar {
   }
 
   draw(): void {
-    const percentage = this.player.health / Player.MAX_HEALTH
+    const percentage = this.player.health / this.config.maxHealth
     const length = Math.max(0, Math.floor(percentage * Healthbar.LENGTH))
-    this.bar.fillStyle(0x000000)
+    this.bar.fillStyle(0x333333)
 
     // Draw a black rectangle for healthbar BG
     this.bar.fillRect(
-      Healthbar.X_POS,
-      Healthbar.Y_POS,
+      this.config.position.x,
+      this.config.position.y,
       Healthbar.LENGTH,
       Healthbar.WIDTH
     )
@@ -63,6 +71,11 @@ export class Healthbar {
     }
 
     // Draw a colored rectangle to represent health
-    this.bar.fillRect(Healthbar.X_POS, Healthbar.Y_POS, length, Healthbar.WIDTH)
+    this.bar.fillRect(
+      this.config.position.x,
+      this.config.position.y,
+      length,
+      Healthbar.WIDTH
+    )
   }
 }
