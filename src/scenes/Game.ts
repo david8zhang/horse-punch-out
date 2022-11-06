@@ -19,7 +19,7 @@ export default class Game extends Phaser.Scene {
   public player!: Player
   public enemy!: Enemy
   public beatTracker!: BeatTracker
-  public currAttackPhase: AttackPhase = AttackPhase.PLAYER
+  public currAttackPhase: AttackPhase = AttackPhase.ENEMY
 
   public bpm = 100
 
@@ -58,7 +58,9 @@ export default class Game extends Phaser.Scene {
         this.player.damage()
         this.cameras.main.shake(150, 0.005)
         if (this.player.health <= 0) {
-          console.log('you lose')
+          this.scene.start('gameover', {
+            score: 0,
+          })
         }
       }
     })
@@ -94,8 +96,6 @@ export default class Game extends Phaser.Scene {
       this.enemy.onDamaged
     )
   }
-  //   public static Y_POS = WINDOW_HEIGHT - 30
-  //   public static X_POS = WINDOW_WIDTH - Healthbar.LENGTH - 60
 
   handleOnBeatForAttackPhase() {
     if (this.currAttackPhase === AttackPhase.ENEMY) {
