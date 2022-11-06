@@ -30,6 +30,8 @@ export default class Game extends Phaser.Scene {
   // track number of player attacks before enemy can attack
   public numPlayerActionsBeforeSwitch: number = 10
   public currPlayerActions: number = -3
+  public playerInputMiss: boolean = false
+  public playerInputMissText!: Phaser.GameObjects.Text
 
   constructor() {
     super('game')
@@ -95,6 +97,19 @@ export default class Game extends Phaser.Scene {
       this.enemy,
       this.enemy.onDamaged
     )
+
+    this.playerInputMissText = this.add
+      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'Miss!')
+      .setStyle({
+        fontSize: '40px',
+        color: 'white',
+      })
+      .setDepth(SORT_ORDER.ui)
+      .setVisible(false)
+    this.playerInputMissText.setPosition(
+      WINDOW_WIDTH / 2 - this.playerInputMissText.displayWidth / 2,
+      WINDOW_HEIGHT / 2 - this.playerInputMissText.displayHeight / 2
+    )
   }
 
   handleOnBeatForAttackPhase() {
@@ -113,7 +128,10 @@ export default class Game extends Phaser.Scene {
         this.currEnemyActions++
       }
     } else {
-      if (this.currPlayerActions + 1 == this.numPlayerActionsBeforeSwitch) {
+      if (
+        this.playerInputMiss ||
+        this.currPlayerActions + 1 == this.numPlayerActionsBeforeSwitch
+      ) {
         this.switchPhase()
       } else {
         this.currPlayerActions++
@@ -121,11 +139,37 @@ export default class Game extends Phaser.Scene {
     }
   }
 
+  onPlayerInputMiss() {
+    this.tweens.add({
+      targets: [this.playerInputMissText],
+      alpha: {
+        from: 1,
+        to: 0,
+      },
+      y: '-=20',
+      onStart: () => {
+        this.playerInputMissText.setVisible(true)
+      },
+      onComplete: () => {
+        this.playerInputMissText
+          .setPosition(
+            WINDOW_WIDTH / 2 - this.playerInputMissText.displayWidth / 2,
+            WINDOW_HEIGHT / 2 - this.playerInputMissText.displayHeight / 2
+          )
+          .setVisible(false)
+          .setAlpha(1)
+      },
+      duration: 1000,
+    })
+    this.playerInputMiss = true
+  }
+
   switchPhase() {
     if (this.currAttackPhase === AttackPhase.ENEMY) {
       this.currPlayerActions = -3
       this.currAttackPhase = AttackPhase.PLAYER
     } else {
+      this.playerInputMiss = false
       this.currEnemyActions = -3
       this.numEnemyActionsBeforeSwitch = 10
       this.currAttackPhase = AttackPhase.ENEMY
