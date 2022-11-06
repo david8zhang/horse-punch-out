@@ -5,7 +5,7 @@ import {
   WINDOW_HEIGHT,
   WINDOW_WIDTH,
 } from '~/core/Constants'
-import { Enemy, EnemyState } from '~/core/Enemy'
+import { Enemy } from '~/core/Enemy'
 import { BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
 import { Healthbar } from '~/core/Healthbar'
@@ -24,7 +24,7 @@ export default class Game extends Phaser.Scene {
   public bpm = 100
 
   // track number of enemy attacks before player can attack
-  public numEnemyActionsBeforeSwitch: number = Phaser.Math.Between(5, 10)
+  public numEnemyActionsBeforeSwitch: number = 10
   public currEnemyActions: number = -3 // Start it at negative to give player time to adjust
 
   // track number of player attacks before enemy can attack
@@ -101,14 +101,14 @@ export default class Game extends Phaser.Scene {
     if (this.currAttackPhase === AttackPhase.ENEMY) {
       if (this.currEnemyActions >= this.numEnemyActionsBeforeSwitch) {
         // Always end enemy attack string with a punch
-        if (this.enemy.currState === EnemyState.WIND_UP_COMPLETE) {
-          this.enemy.onBeat()
+        if (this.enemy.isWindingUp) {
+          this.enemy.onBeat(true)
         } else {
           this.switchPhase()
         }
       } else {
         if (this.currEnemyActions >= 0) {
-          this.enemy.onBeat()
+          this.enemy.onBeat(false)
         }
         this.currEnemyActions++
       }
@@ -127,7 +127,7 @@ export default class Game extends Phaser.Scene {
       this.currAttackPhase = AttackPhase.PLAYER
     } else {
       this.currEnemyActions = -3
-      this.numEnemyActionsBeforeSwitch = Phaser.Math.Between(5, 10)
+      this.numEnemyActionsBeforeSwitch = 10
       this.currAttackPhase = AttackPhase.ENEMY
     }
     this.beatTracker.handlePhaseSwitch(this.currAttackPhase)
