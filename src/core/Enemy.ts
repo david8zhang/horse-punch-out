@@ -9,11 +9,17 @@ export interface EnemyConfig {
   }
 }
 
-export enum EnemyState {
+export enum EnemyArmState {
   IDLE = 'IDLE',
   WINDING_UP = 'WINDING_UP',
   WIND_UP_COMPLETE = 'WIND_UP_COMPLETE',
   PUNCHING = 'PUNCHING',
+}
+
+export enum EnemyAction {
+  PASS = 'PASS',
+  PUNCH = 'PUNCH',
+  WIND_UP = 'WIND_UP',
 }
 
 export class Enemy {
@@ -27,7 +33,8 @@ export class Enemy {
   public onPunch: Array<(dir: Direction) => void> = []
 
   // state
-  public currState: EnemyState = EnemyState.IDLE
+  public currLeftState: EnemyArmState = EnemyArmState.IDLE
+  public currRightState: EnemyArmState = EnemyArmState.IDLE
   private punchDirection: Direction = Direction.NONE
 
   // renderer
@@ -62,13 +69,27 @@ export class Enemy {
       .setDepth(SORT_ORDER.fist)
   }
 
+  setState(direction: Direction, newState: EnemyArmState) {
+    if (direction === Direction.LEFT) {
+      this.currLeftState = newState
+    } else {
+      this.currRightState = newState
+    }
+  }
+
+  getState(direction: Direction) {
+    return direction === Direction.LEFT
+      ? this.currLeftState
+      : this.currRightState
+  }
+
   windUp(direction: Direction) {
+    const currState = this.getState(direction)
     // Don't wind up a new punch if we're already punching
-    if (this.currState !== EnemyState.IDLE) {
+    if (currState !== EnemyArmState.IDLE) {
       return
     }
-    this.currState = EnemyState.WINDING_UP
-    this.punchDirection = direction
+    this.setState(direction, EnemyArmState.WINDING_UP)
     const fistToMove =
       direction === Direction.LEFT ? this.leftFist : this.rightFist
     this.game.tweens.add({
@@ -77,21 +98,22 @@ export class Enemy {
       ease: 'Quad.easeInOut',
       duration: 50,
       onComplete: () => {
-        this.currState = EnemyState.WIND_UP_COMPLETE
+        this.setState(direction, EnemyArmState.WIND_UP_COMPLETE)
       },
     })
   }
 
-  startPunch() {
+  startPunch(direction: Direction) {
+    const currState = this.getState(direction)
     // We need to wind up a punch first before starting it
-    if (this.currState != EnemyState.WIND_UP_COMPLETE) {
+    if (currState != EnemyArmState.WIND_UP_COMPLETE) {
       return
     }
-    this.currState = EnemyState.PUNCHING
+    this.setState(direction, EnemyArmState.PUNCHING)
     const fistToMove =
-      this.punchDirection === Direction.LEFT ? this.leftFist : this.rightFist
-    const bodyAngle = this.punchDirection === Direction.LEFT ? -10 : 10
-    const bodyPos = this.punchDirection === Direction.LEFT ? 150 : -150
+      direction === Direction.LEFT ? this.leftFist : this.rightFist
+    const bodyAngle = direction === Direction.LEFT ? -10 : 10
+    const bodyPos = direction === Direction.LEFT ? 150 : -150
 
     this.game.tweens.add({
       targets: [this.body],
@@ -110,16 +132,16 @@ export class Enemy {
       duration: Enemy.PUNCH_DURATION, // this is like an "grace period" (in addition to the wind up) giving players time to react to the punch animation, larger number = more lenient
       onComplete: () => {
         // punch when fist reaches end
-        this.punch()
+        this.punch(direction)
       },
     })
   }
 
-  punch() {
+  punch(direction: Direction) {
     const fistToMove =
-      this.punchDirection === Direction.LEFT ? this.leftFist : this.rightFist
+      direction === Direction.LEFT ? this.leftFist : this.rightFist
     // broadcast punch
-    this.onPunch.forEach((handler) => handler(this.punchDirection))
+    this.onPunch.forEach((handler) => handler(direction))
     this.game.tweens.add({
       targets: [fistToMove],
       x:
@@ -130,20 +152,79 @@ export class Enemy {
       duration: 150, // punch recovery time
       ease: 'Quint.easeInOut',
       onComplete: () => {
-        this.currState = EnemyState.IDLE
-        this.punchDirection = Direction.NONE
+        this.setState(direction, EnemyArmState.IDLE)
       },
     })
   }
 
-  onBeat() {
-    if (this.currState === EnemyState.WIND_UP_COMPLETE) {
-      this.startPunch()
-    } else {
-      const randDirection =
-        Phaser.Math.Between(0, 1) === 0 ? Direction.LEFT : Direction.RIGHT
-      this.windUp(randDirection)
+  public get isWindingUp() {
+    return (
+      this.currLeftState === EnemyArmState.WIND_UP_COMPLETE ||
+      this.currRightState === EnemyArmState.WIND_UP_COMPLETE
+    )
+  }
+
+  getPossibleActionForState(
+    direction: Direction,
+    isLastAttack: boolean
+  ): EnemyAction {
+    const state =
+      direction === Direction.LEFT ? this.currLeftState : this.currRightState
+    const otherState =
+      direction === Direction.LEFT ? this.currRightState : this.currLeftState
+    if (isLastAttack) {
+      switch (state) {
+        case EnemyArmState.WIND_UP_COMPLETE: {
+          return EnemyAction.PUNCH
+        }
+        default:
+          return EnemyAction.PASS
+      }
     }
+    switch (state) {
+      case EnemyArmState.WIND_UP_COMPLETE: {
+        return EnemyAction.PUNCH
+      }
+      case EnemyArmState.IDLE: {
+        if (otherState === EnemyArmState.WINDING_UP) {
+          return EnemyAction.PASS
+        }
+        const possibleActions = [EnemyAction.WIND_UP, EnemyAction.PASS]
+        return possibleActions[
+          Phaser.Math.Between(0, possibleActions.length - 1)
+        ]
+      }
+      default:
+        return EnemyAction.PASS
+    }
+  }
+
+  handleAction(action: EnemyAction, direction: Direction) {
+    switch (action) {
+      case EnemyAction.PUNCH: {
+        this.startPunch(direction)
+        break
+      }
+      case EnemyAction.WIND_UP: {
+        this.windUp(direction)
+        break
+      }
+      default:
+        break
+    }
+  }
+
+  onBeat(isLastAttack: boolean) {
+    const leftAction = this.getPossibleActionForState(
+      Direction.LEFT,
+      isLastAttack
+    )
+    this.handleAction(leftAction, Direction.LEFT)
+    const rightAction = this.getPossibleActionForState(
+      Direction.RIGHT,
+      isLastAttack
+    )
+    this.handleAction(rightAction, Direction.RIGHT)
   }
 
   damage() {
