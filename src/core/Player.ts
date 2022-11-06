@@ -139,6 +139,9 @@ export class Player {
       this.game.cameras.main.shake(150, 0.005)
       // TODO: put this logic in "game" or somewhere else
       this.game.enemy.damage()
+    } else {
+      // if the player misses an input, then attack phase goes back to the enemy
+      this.game.onPlayerInputMiss()
     }
 
     this.prevPunchDirection = direction
