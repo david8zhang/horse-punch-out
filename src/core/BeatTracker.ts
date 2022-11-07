@@ -59,6 +59,14 @@ export class BeatTracker {
     this.createBeatEvent()
   }
 
+  pause() {
+    this.beatEvent.paused = true
+    this.beatTrackerUITweens.forEach((tween) => {
+      tween.pause()
+      tween.restart()
+    })
+  }
+
   start() {
     this.beatEvent.paused = false
     this.beatTrackerUITweens.forEach((tween) => {

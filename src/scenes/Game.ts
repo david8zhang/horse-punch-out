@@ -62,6 +62,10 @@ export default class Game extends Phaser.Scene {
         this.player.damage(ENEMY_DAMAGE)
         this.cameras.main.shake(150, 0.005)
         if (this.player.health <= 0) {
+          this.beatTracker.pause()
+          this.currAttackPhase = AttackPhase.PLAYER
+          this.currEnemyActions = -3
+          this.currPlayerActions = -3
           this.scene.start('gameover', {
             score: 0,
           })
@@ -99,19 +103,6 @@ export default class Game extends Phaser.Scene {
       this.enemy,
       this.enemy.onDamaged
     )
-
-    this.playerInputMissText = this.add
-      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'Miss!')
-      .setStyle({
-        fontSize: '40px',
-        color: 'white',
-      })
-      .setDepth(SORT_ORDER.ui)
-      .setVisible(false)
-    this.playerInputMissText.setPosition(
-      WINDOW_WIDTH / 2 - this.playerInputMissText.displayWidth / 2,
-      WINDOW_HEIGHT / 2 - this.playerInputMissText.displayHeight / 2
-    )
   }
 
   handleOnBeatForAttackPhase() {
@@ -142,26 +133,32 @@ export default class Game extends Phaser.Scene {
   }
 
   onPlayerInputMiss() {
+    const playerInputMissText = this.add
+      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'Miss!')
+      .setStyle({
+        fontSize: '40px',
+        color: 'white',
+      })
+      .setDepth(SORT_ORDER.ui)
+      .setVisible(false)
+    playerInputMissText.setPosition(
+      WINDOW_WIDTH / 2 - playerInputMissText.displayWidth / 2,
+      WINDOW_HEIGHT / 2 - playerInputMissText.displayHeight / 2
+    )
     this.tweens.add({
-      targets: [this.playerInputMissText],
+      targets: [playerInputMissText],
       alpha: {
         from: 1,
         to: 0,
       },
       y: '-=20',
       onStart: () => {
-        this.playerInputMissText.setVisible(true)
+        playerInputMissText.setVisible(true)
       },
       onComplete: () => {
-        this.playerInputMissText
-          .setPosition(
-            WINDOW_WIDTH / 2 - this.playerInputMissText.displayWidth / 2,
-            WINDOW_HEIGHT / 2 - this.playerInputMissText.displayHeight / 2
-          )
-          .setVisible(false)
-          .setAlpha(1)
+        playerInputMissText.destroy()
       },
-      duration: 1000,
+      duration: 500,
     })
     this.playerInputMiss = true
   }
