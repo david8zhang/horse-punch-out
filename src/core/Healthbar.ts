@@ -14,20 +14,19 @@ export class Healthbar {
 
   public static LENGTH = 200
   public static WIDTH = 20
-  public static MAX_HEALTH = 6
 
   private bar: Phaser.GameObjects.Graphics
-  private player: { health: number }
+  private entity: { health: number }
   private config: HealthbarConfig
 
   constructor(
     scene: Game,
     config: HealthbarConfig,
-    player: { health: number },
+    entity: { health: number },
     onHealthChanged: Array<() => void>
   ) {
     this.scene = scene
-    this.player = player
+    this.entity = entity
     this.config = config
 
     // Draw bar
@@ -50,7 +49,7 @@ export class Healthbar {
   }
 
   draw(): void {
-    const percentage = this.player.health / this.config.maxHealth
+    const percentage = this.entity.health / this.config.maxHealth
     const length = Math.max(0, Math.floor(percentage * Healthbar.LENGTH))
     this.bar.fillStyle(0x333333)
 
