@@ -27,6 +27,8 @@ export class Enemy {
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
   private static readonly PUNCH_DURATION = 50
+  public static readonly MAX_HEALTH = 100
+
   private readonly RIGHT_FIST_POSITION: number
   private readonly LEFT_FIST_POSITION: number
   private readonly BODY_POSITION: { x: number; y: number }
@@ -35,14 +37,13 @@ export class Enemy {
   // state
   public currLeftState: EnemyArmState = EnemyArmState.IDLE
   public currRightState: EnemyArmState = EnemyArmState.IDLE
-  private punchDirection: Direction = Direction.NONE
 
   // renderer
   private game: Game
   private body: Phaser.GameObjects.Rectangle
   private rightFist: Phaser.GameObjects.Arc
   private leftFist: Phaser.GameObjects.Arc
-  public health: number = 20
+  public health: number = Enemy.MAX_HEALTH
 
   public onDamaged: Array<() => void> = []
 
@@ -227,8 +228,8 @@ export class Enemy {
     this.handleAction(rightAction, Direction.RIGHT)
   }
 
-  damage() {
-    this.health--
+  damage(damageAmt: number) {
+    this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
   }
 }

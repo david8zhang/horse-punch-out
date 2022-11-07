@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
 import {
   Direction,
+  ENEMY_DAMAGE,
+  PLAYER_DAMAGE_MAPPING,
   SORT_ORDER,
   WINDOW_HEIGHT,
   WINDOW_WIDTH,
 } from '~/core/Constants'
 import { Enemy } from '~/core/Enemy'
-import { BeatTracker } from '~/core/BeatTracker'
+import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
 import { Healthbar } from '~/core/Healthbar'
 
@@ -19,7 +21,7 @@ export default class Game extends Phaser.Scene {
   public player!: Player
   public enemy!: Enemy
   public beatTracker!: BeatTracker
-  public currAttackPhase: AttackPhase = AttackPhase.ENEMY
+  public currAttackPhase: AttackPhase = AttackPhase.PLAYER
 
   public bpm = 100
 
@@ -57,7 +59,7 @@ export default class Game extends Phaser.Scene {
         // player successfully dodged
       } else {
         // got punched
-        this.player.damage()
+        this.player.damage(ENEMY_DAMAGE)
         this.cameras.main.shake(150, 0.005)
         if (this.player.health <= 0) {
           this.scene.start('gameover', {
@@ -92,7 +94,7 @@ export default class Game extends Phaser.Scene {
           x: 60,
           y: 30,
         },
-        maxHealth: 20,
+        maxHealth: Enemy.MAX_HEALTH,
       },
       this.enemy,
       this.enemy.onDamaged
@@ -226,6 +228,42 @@ export default class Game extends Phaser.Scene {
       onComplete: () => {
         countdownText.destroy()
       },
+    })
+  }
+
+  handlePlayerAttack(beatQuality: BeatQuality) {
+    this.cameras.main.shake(150, 0.005)
+    const damageToDeal = PLAYER_DAMAGE_MAPPING[beatQuality]
+    this.enemy.damage(damageToDeal)
+
+    const beatQualityText = this.add
+      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, beatQuality)
+      .setStyle({
+        fontSize: '30px',
+        color: 'white',
+      })
+      .setDepth(SORT_ORDER.ui)
+      .setVisible(false)
+
+    beatQualityText.setPosition(
+      WINDOW_WIDTH / 2 - beatQualityText.displayWidth / 2,
+      WINDOW_HEIGHT / 2 - beatQualityText.displayHeight / 2
+    )
+
+    this.tweens.add({
+      targets: [beatQualityText],
+      alpha: {
+        from: 1,
+        to: 0,
+      },
+      y: '-=20',
+      onStart: () => {
+        beatQualityText.setVisible(true)
+      },
+      onComplete: () => {
+        beatQualityText.destroy()
+      },
+      duration: 500,
     })
   }
 }

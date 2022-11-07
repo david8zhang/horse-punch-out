@@ -7,7 +7,16 @@ export interface BeatListenerConfig {
   callback: Function
 }
 
+export enum BeatQuality {
+  EARLY = 'Early!',
+  PERFECT = 'Perfect!',
+  LATE = 'Late!',
+}
+
 export class BeatTracker {
+  private static readonly LATE_THRESHOLD_MS = 40
+  private static readonly EARLY_THRESHOLD_DIFF = -5
+
   private bpm: number
   private game: Game
   private background: Phaser.GameObjects.Rectangle
@@ -20,6 +29,7 @@ export class BeatTracker {
   public allCircles: Phaser.GameObjects.Arc[] = []
 
   public beatListeners: Array<() => void> = []
+  private lastBeatTimestamp: number = 0
 
   constructor(game: Game, bpm: number) {
     this.game = game
@@ -162,17 +172,37 @@ export class BeatTracker {
     )
   }
 
+  get beatQuality(): BeatQuality {
+    let currTimestamp = Date.now()
+    if (this.middleCircle.visible) {
+      // If the middle circle is already visible, beat quality can be perfect or late
+      const timeDiff = currTimestamp - this.lastBeatTimestamp
+      if (timeDiff > BeatTracker.LATE_THRESHOLD_MS) {
+        return BeatQuality.LATE
+      } else {
+        return BeatQuality.PERFECT
+      }
+    } else {
+      const diff = this.leftBeatCircle.x - this.middleCircle.x
+      if (diff < BeatTracker.EARLY_THRESHOLD_DIFF) {
+        return BeatQuality.EARLY
+      } else {
+        return BeatQuality.PERFECT
+      }
+    }
+  }
+
   get isOnBeat() {
     if (this.middleCircle.visible) {
       return true
     } else {
       const diff = this.leftBeatCircle.x - this.middleCircle.x
-      console.log(diff)
       return diff > -10
     }
   }
 
   onBeat() {
+    this.lastBeatTimestamp = Date.now()
     this.beatListeners.forEach((fn) => {
       fn()
     })

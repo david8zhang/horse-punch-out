@@ -13,7 +13,7 @@ export class Player {
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
-  public static readonly MAX_HEALTH = 3
+  public static readonly MAX_HEALTH = 100
 
   private game: Game
   private body: Phaser.GameObjects.Rectangle
@@ -135,10 +135,10 @@ export class Player {
     ) {
       return
     }
+
     if (this.game.beatTracker.isOnBeat) {
-      this.game.cameras.main.shake(150, 0.005)
-      // TODO: put this logic in "game" or somewhere else
-      this.game.enemy.damage()
+      const beatQuality = this.game.beatTracker.beatQuality
+      this.game.handlePlayerAttack(beatQuality)
     } else {
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()
@@ -171,8 +171,8 @@ export class Player {
     })
   }
 
-  damage() {
-    this.health--
+  damage(damageAmt: number) {
+    this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
   }
 }

@@ -1,3 +1,5 @@
+import { BeatQuality } from './BeatTracker'
+
 export const WINDOW_WIDTH = 800
 export const WINDOW_HEIGHT = 600
 
@@ -13,3 +15,11 @@ export const SORT_ORDER = {
   fist: 400,
   ui: 500,
 }
+
+export const PLAYER_DAMAGE_MAPPING = {
+  [BeatQuality.EARLY]: 10,
+  [BeatQuality.LATE]: 10,
+  [BeatQuality.PERFECT]: 20,
+}
+
+export const ENEMY_DAMAGE = 25
