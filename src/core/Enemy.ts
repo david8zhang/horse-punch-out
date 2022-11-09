@@ -1,5 +1,4 @@
 import Game from '~/scenes/Game'
-import { Time } from 'phaser'
 import { Direction, SORT_ORDER } from '~/core/Constants'
 
 export interface EnemyConfig {
@@ -33,6 +32,7 @@ export class Enemy {
   private readonly LEFT_FIST_POSITION: number
   private readonly BODY_POSITION: { x: number; y: number }
   public onPunch: Array<(dir: Direction) => void> = []
+  public onDied: Array<() => void> = []
 
   // state
   public currLeftState: EnemyArmState = EnemyArmState.IDLE
@@ -45,7 +45,7 @@ export class Enemy {
   private leftFist: Phaser.GameObjects.Arc
   public health: number = Enemy.MAX_HEALTH
 
-  public onDamaged: Array<() => void> = []
+  public onHealthChanged: Array<() => void> = []
 
   constructor(game: Game, config: EnemyConfig) {
     this.game = game
@@ -230,6 +230,14 @@ export class Enemy {
 
   damage(damageAmt: number) {
     this.health -= damageAmt
-    this.onDamaged.forEach((handler) => handler())
+    this.onHealthChanged.forEach((handler) => handler())
+    if (this.health <= 0) {
+      this.onDied.forEach((handler) => handler())
+    }
+  }
+
+  reset() {
+    this.health = Enemy.MAX_HEALTH
+    this.onHealthChanged.forEach((handler) => handler())
   }
 }

@@ -23,9 +23,11 @@ export class Player {
   public currDodgeDirection: Direction = Direction.NONE
   public currPunchDirection: Direction = Direction.NONE
   public prevPunchDirection: Direction = Direction.LEFT
+  // TODO: change to readonly (define a getter, no setter)
   public health: number = Player.MAX_HEALTH
 
   public onDamaged: Array<() => void> = []
+  public onDied: Array<() => void> = []
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
@@ -174,5 +176,8 @@ export class Player {
   damage(damageAmt: number) {
     this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
+    if (this.health <= 0) {
+      this.onDied.forEach((handler) => handler())
+    }
   }
 }
