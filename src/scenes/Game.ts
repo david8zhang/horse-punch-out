@@ -46,6 +46,7 @@ export default class Game extends Phaser.Scene {
         y: WINDOW_HEIGHT - 50,
       },
     })
+    this.player.onDied.push(this.gameOver.bind(this))
     this.beatTracker = new BeatTracker(this, this.bpm)
     this.enemy = new Enemy(this, {
       position: {
@@ -53,6 +54,7 @@ export default class Game extends Phaser.Scene {
         y: WINDOW_HEIGHT - 400,
       },
     })
+    this.enemy.onDied.push(this.handleDefeatedEnemy.bind(this))
     this.enemy.onPunch.push((punchDirection: Direction) => {
       // TODO: put this logic somewhere else (probably in player class)
       if (this.player.currDodgeDirection == punchDirection) {
@@ -61,15 +63,6 @@ export default class Game extends Phaser.Scene {
         // got punched
         this.player.damage(ENEMY_DAMAGE)
         this.cameras.main.shake(150, 0.005)
-        if (this.player.health <= 0) {
-          this.beatTracker.pause()
-          this.currAttackPhase = AttackPhase.PLAYER
-          this.currEnemyActions = -3
-          this.currPlayerActions = -3
-          this.scene.start('gameover', {
-            score: 0,
-          })
-        }
       }
     })
     this.beatTracker.addBeatListener(() => {
@@ -101,7 +94,7 @@ export default class Game extends Phaser.Scene {
         maxHealth: Enemy.MAX_HEALTH,
       },
       this.enemy,
-      this.enemy.onDamaged
+      this.enemy.onHealthChanged
     )
   }
 
@@ -262,5 +255,26 @@ export default class Game extends Phaser.Scene {
       },
       duration: 500,
     })
+  }
+
+  gameOver() {
+    this.beatTracker.pause()
+    this.currAttackPhase = AttackPhase.PLAYER
+    this.currEnemyActions = -3
+    this.currPlayerActions = -3
+    this.scene.start('gameover', {
+      score: 0,
+    })
+  }
+
+  handleDefeatedEnemy() {
+    this.currAttackPhase = AttackPhase.PLAYER
+    this.currEnemyActions = -3
+    this.currPlayerActions = -3
+    this.bpm += 10
+    this.beatTracker.restart(this.bpm)
+    this.enemy.reset()
+    this.startPhaseSwitchCountdown()
+    console.log('you win')
   }
 }

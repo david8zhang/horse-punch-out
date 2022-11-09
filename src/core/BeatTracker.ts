@@ -74,6 +74,17 @@ export class BeatTracker {
     })
   }
 
+  restart(bpm: number) {
+    this.bpm = bpm
+    this.beatTrackerUITweens.forEach((tween) => tween.stop())
+    this.beatTrackerUITweens = []
+    this.allCircles.forEach((circle) => circle.destroy())
+    this.allCircles = []
+    this.beatEvent.destroy()
+    this.initBeatAndUI()
+    this.start()
+  }
+
   handlePhaseSwitch(newAttackPhase: AttackPhase) {
     const circleColor =
       newAttackPhase === AttackPhase.ENEMY ? 0xff0000 : 0x00ff00
