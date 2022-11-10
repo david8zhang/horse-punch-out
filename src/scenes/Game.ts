@@ -11,6 +11,7 @@ import { Enemy } from '~/core/Enemy'
 import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
 import { Healthbar } from '~/core/Healthbar'
+import { button } from '~/ui/Button'
 
 export enum AttackPhase {
   PLAYER,
@@ -268,6 +269,30 @@ export default class Game extends Phaser.Scene {
   }
 
   handleDefeatedEnemy() {
+    this.beatTracker.pause()
+    this.input.keyboard.manager.enabled = false
+    const domElementsContainer = this.add.container(0, 0)
+    const restartButton = button('Next Level', {
+      fontSize: '12px',
+      color: 'black',
+      fontFamily: 'Daydream',
+      width: 150,
+      height: 40,
+    }) as HTMLElement
+
+    const restartButtonDom = this.add
+      .dom(this.scale.width / 2, this.scale.height / 2 + 30, restartButton)
+      .setOrigin(0.5)
+      .addListener('click')
+      .on('click', () => {
+        this.restart()
+        domElementsContainer.destroy()
+      })
+    domElementsContainer.add(restartButtonDom)
+  }
+
+  restart() {
+    this.input.keyboard.manager.enabled = true
     this.currAttackPhase = AttackPhase.PLAYER
     this.currEnemyActions = -3
     this.currPlayerActions = -3
