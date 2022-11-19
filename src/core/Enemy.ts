@@ -1,5 +1,6 @@
 import Game from '~/scenes/Game'
 import { Direction, SORT_ORDER } from '~/core/Constants'
+import { Healthbar } from './Healthbar'
 
 export interface EnemyConfig {
   position: {
@@ -43,9 +44,12 @@ export class Enemy {
   private body: Phaser.GameObjects.Rectangle
   private rightFist: Phaser.GameObjects.Arc
   private leftFist: Phaser.GameObjects.Arc
-  public health: number = Enemy.MAX_HEALTH
 
+  // Health
+  public maxHealth: number = Enemy.MAX_HEALTH
+  public health: number = this.maxHealth
   public onHealthChanged: Array<() => void> = []
+  public healthBar!: Healthbar
 
   constructor(game: Game, config: EnemyConfig) {
     this.game = game
@@ -68,6 +72,23 @@ export class Enemy {
     this.leftFist = this.game.add
       .circle(this.LEFT_FIST_POSITION, position.y, Enemy.FIST_RADIUS, 0xff0000)
       .setDepth(SORT_ORDER.fist)
+    this.setupHealthBar()
+  }
+
+  setupHealthBar() {
+    this.healthBar = new Healthbar(
+      this.game,
+      {
+        position: {
+          x: 10,
+          y: 10,
+        },
+      },
+      this
+    )
+    this.onHealthChanged.push(() => {
+      this.healthBar.draw()
+    })
   }
 
   setState(direction: Direction, newState: EnemyArmState) {
@@ -237,7 +258,11 @@ export class Enemy {
   }
 
   reset() {
-    this.health = Enemy.MAX_HEALTH
+    this.health = this.maxHealth
     this.onHealthChanged.forEach((handler) => handler())
+  }
+
+  setMaxHealth(maxHealth: number) {
+    this.maxHealth = maxHealth
   }
 }

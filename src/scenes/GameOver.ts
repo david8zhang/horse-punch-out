@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import { button } from '~/ui/Button'
-import { text } from '~/ui/Text'
-import { WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/constants'
+import { DEFAULT_FONT, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/constants'
 
 export default class GameOver extends Phaser.Scene {
   private score = 0
@@ -11,46 +10,40 @@ export default class GameOver extends Phaser.Scene {
   }
 
   init(data): void {
-    this.score = data.score
+    if (data.score) {
+      this.score = data.score
+    }
   }
 
   create(): void {
-    this.cameras.main.fadeIn(9000, 1, 1, 1)
-
+    this.cameras.main.fadeIn(2000, 1, 1, 1)
     const bg = this.add.image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'gameover')
-
     bg.setScale(2)
-
     const domElementsContainer = this.add.container(0, 0)
-
-    const gameOverText = text('GAME OVER', {
-      fontSize: '40px',
-      color: 'red',
-      fontWeight: 'bolder',
-      '-webkit-text-stroke-width': '2px',
-      '-webkit-text-stroke-color': 'black',
-    }) as HTMLElement
-
-    const scoreText = text(`Your score: ${this.score}`, {
-      fontSize: '20px',
-      color: 'red',
-      fontWeight: 'bolder',
-      '-webkit-text-stroke-width': '2px',
-      '-webkit-text-stroke-color': 'black',
-    }) as HTMLElement
-
-    const gameOverTextDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 5, gameOverText)
+    this.add
+      .text(this.scale.width / 2, this.scale.height / 3, 'GAME OVER')
+      .setStyle({
+        fontSize: '40px',
+        fontFamily: DEFAULT_FONT,
+      })
       .setOrigin(0.5)
 
-    const scoreTextDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 5 + 64, scoreText)
+    this.add
+      .text(
+        this.scale.width / 2,
+        this.scale.height / 3 + 50,
+        `Score: ${this.score}`
+      )
+      .setStyle({
+        fontSize: '40px',
+        fontFamily: DEFAULT_FONT,
+      })
       .setOrigin(0.5)
 
     const restartButton = button('Play Again', {
-      fontSize: '12px',
+      fontSize: '20px',
+      fontFamily: DEFAULT_FONT,
       color: 'black',
-      fontFamily: 'Daydream',
       width: 150,
       height: 40,
     }) as HTMLElement
@@ -66,15 +59,12 @@ export default class GameOver extends Phaser.Scene {
         gameScene.sound.removeAll()
         this.scene.start('game', { shouldSkipTutorial: true })
       })
-
-    domElementsContainer.add(gameOverTextDom)
-    domElementsContainer.add(scoreTextDom)
     domElementsContainer.add(restartButtonDom)
     domElementsContainer.setAlpha(0)
-    this.time.delayedCall(2000, () => {
+    this.time.delayedCall(500, () => {
       this.tweens.add({
         targets: domElementsContainer,
-        alpha: { value: 1, duration: 1000 },
+        alpha: { value: 1, duration: 500 },
       })
     })
   }

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import {
+  DEFAULT_FONT,
   Direction,
   ENEMY_DAMAGE,
   PLAYER_DAMAGE_MAPPING,
@@ -10,7 +11,6 @@ import {
 import { Enemy } from '~/core/Enemy'
 import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
-import { Healthbar } from '~/core/Healthbar'
 import { button } from '~/ui/Button'
 
 export enum AttackPhase {
@@ -22,7 +22,7 @@ export default class Game extends Phaser.Scene {
   public player!: Player
   public enemy!: Enemy
   public beatTracker!: BeatTracker
-  public currAttackPhase: AttackPhase = AttackPhase.PLAYER
+  public currAttackPhase: AttackPhase = AttackPhase.ENEMY
 
   public bpm = 100
 
@@ -35,6 +35,8 @@ export default class Game extends Phaser.Scene {
   public currPlayerActions: number = -3
   public playerInputMiss: boolean = false
   public playerInputMissText!: Phaser.GameObjects.Text
+
+  public domElementsContainer!: Phaser.GameObjects.Container
 
   constructor() {
     super('game')
@@ -71,32 +73,28 @@ export default class Game extends Phaser.Scene {
     })
     this.beatTracker.start()
     this.startPhaseSwitchCountdown()
+    this.createButtonDOM()
+  }
 
-    // create health bars
-    new Healthbar(
-      this,
-      {
-        position: {
-          x: WINDOW_WIDTH - Healthbar.LENGTH - 10,
-          y: WINDOW_HEIGHT - 30,
-        },
-        maxHealth: Player.MAX_HEALTH,
-      },
-      this.player,
-      this.player.onDamaged
-    )
-    new Healthbar(
-      this,
-      {
-        position: {
-          x: 60,
-          y: 30,
-        },
-        maxHealth: Enemy.MAX_HEALTH,
-      },
-      this.enemy,
-      this.enemy.onHealthChanged
-    )
+  createButtonDOM() {
+    this.domElementsContainer = this.add.container(0, 0).setVisible(false)
+    const restartButton = button('Next Level', {
+      fontSize: '20px',
+      color: 'black',
+      fontFamily: DEFAULT_FONT,
+      width: 150,
+      height: 40,
+    }) as HTMLElement
+
+    const restartButtonDom = this.add
+      .dom(this.scale.width / 2, this.scale.height / 2 + 30, restartButton)
+      .setOrigin(0.5)
+      .addListener('click')
+      .on('click', () => {
+        this.restart()
+        this.domElementsContainer.setVisible(false)
+      })
+    this.domElementsContainer.add(restartButtonDom)
   }
 
   handleOnBeatForAttackPhase() {
@@ -132,6 +130,7 @@ export default class Game extends Phaser.Scene {
       .setStyle({
         fontSize: '40px',
         color: 'white',
+        fontFamily: DEFAULT_FONT,
       })
       .setDepth(SORT_ORDER.ui)
       .setVisible(false)
@@ -185,6 +184,7 @@ export default class Game extends Phaser.Scene {
       .setStyle({
         fontSize: '30px',
         color: '#ffffff',
+        fontFamily: DEFAULT_FONT,
       })
       .setDepth(SORT_ORDER.ui)
     countdownText.setPosition(
@@ -232,6 +232,7 @@ export default class Game extends Phaser.Scene {
       .setStyle({
         fontSize: '30px',
         color: 'white',
+        fontFamily: DEFAULT_FONT,
       })
       .setDepth(SORT_ORDER.ui)
       .setVisible(false)
@@ -271,35 +272,25 @@ export default class Game extends Phaser.Scene {
   handleDefeatedEnemy() {
     this.beatTracker.pause()
     this.input.keyboard.manager.enabled = false
-    const domElementsContainer = this.add.container(0, 0)
-    const restartButton = button('Next Level', {
-      fontSize: '12px',
-      color: 'black',
-      fontFamily: 'Daydream',
-      width: 150,
-      height: 40,
-    }) as HTMLElement
-
-    const restartButtonDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 2 + 30, restartButton)
-      .setOrigin(0.5)
-      .addListener('click')
-      .on('click', () => {
-        this.restart()
-        domElementsContainer.destroy()
-      })
-    domElementsContainer.add(restartButtonDom)
+    this.domElementsContainer.setVisible(true)
   }
 
   restart() {
     this.input.keyboard.manager.enabled = true
-    this.currAttackPhase = AttackPhase.PLAYER
+
+    // Reset the attack phase counters
+    this.currAttackPhase = AttackPhase.ENEMY
     this.currEnemyActions = -3
     this.currPlayerActions = -3
+
+    // Restart the beat tracker
     this.bpm += 10
     this.beatTracker.restart(this.bpm)
+
+    // Increase the enemy's max health
+    this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
     this.enemy.reset()
+
     this.startPhaseSwitchCountdown()
-    console.log('you win')
   }
 }

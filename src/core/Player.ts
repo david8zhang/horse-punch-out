@@ -1,6 +1,7 @@
 import Game from '~/scenes/Game'
-import { Direction } from '~/core/Constants'
+import { Direction, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
 import { SORT_ORDER } from './Constants'
+import { Healthbar } from './Healthbar'
 
 export interface PlayerConfig {
   position: {
@@ -23,8 +24,11 @@ export class Player {
   public currDodgeDirection: Direction = Direction.NONE
   public currPunchDirection: Direction = Direction.NONE
   public prevPunchDirection: Direction = Direction.LEFT
+
   // TODO: change to readonly (define a getter, no setter)
-  public health: number = Player.MAX_HEALTH
+  public maxHealth: number = Player.MAX_HEALTH
+  public health: number = this.maxHealth
+  public healthBar!: Healthbar
 
   public onDamaged: Array<() => void> = []
   public onDied: Array<() => void> = []
@@ -58,6 +62,23 @@ export class Player {
       )
       .setDepth(SORT_ORDER.fist)
     this.initKeyPressListener()
+    this.setupHealthbar()
+  }
+
+  setupHealthbar() {
+    this.healthBar = new Healthbar(
+      this.game,
+      {
+        position: {
+          x: WINDOW_WIDTH - Healthbar.LENGTH - 40,
+          y: WINDOW_HEIGHT - 30,
+        },
+      },
+      this
+    )
+    this.onDamaged.push(() => {
+      this.healthBar.draw()
+    })
   }
 
   initKeyPressListener() {

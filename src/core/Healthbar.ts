@@ -1,9 +1,6 @@
 import Game from '~/scenes/Game'
-import { WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
-import { Player } from './Player'
 
 export interface HealthbarConfig {
-  maxHealth: number
   position: {
     x: number
     y: number
@@ -16,14 +13,13 @@ export class Healthbar {
   public static WIDTH = 20
 
   private bar: Phaser.GameObjects.Graphics
-  private entity: { health: number }
+  private entity: { health: number; maxHealth: number }
   private config: HealthbarConfig
 
   constructor(
     scene: Game,
     config: HealthbarConfig,
-    entity: { health: number },
-    onHealthChanged: Array<() => void>
+    entity: { health: number; maxHealth: number }
   ) {
     this.scene = scene
     this.entity = entity
@@ -33,29 +29,23 @@ export class Healthbar {
     this.bar = new Phaser.GameObjects.Graphics(this.scene)
     this.bar.setDepth(1000)
     this.scene.add.existing(this.bar)
-    onHealthChanged.push(this.handleHealthDecreased.bind(this))
     this.draw()
 
     this.scene.add
-      .text(config.position.x - 40, config.position.y, 'HP:', {
-        fontSize: '16px',
-        fontFamily: 'Daydream',
-      })
-      .setOrigin(0)
-  }
-
-  handleHealthDecreased(): void {
-    this.draw()
+      .image(this.config.position.x + 10, this.config.position.y + 8, 'heart')
+      .setTintFill(0xff0000)
+      .setScale(0.5)
   }
 
   draw(): void {
-    const percentage = this.entity.health / this.config.maxHealth
+    this.bar.clear()
+    const percentage = this.entity.health / this.entity.maxHealth
     const length = Math.max(0, Math.floor(percentage * Healthbar.LENGTH))
-    this.bar.fillStyle(0x333333)
+    this.bar.fillStyle(0xffffff)
 
     // Draw a black rectangle for healthbar BG
     this.bar.fillRect(
-      this.config.position.x,
+      this.config.position.x + 30,
       this.config.position.y,
       Healthbar.LENGTH,
       Healthbar.WIDTH
@@ -71,7 +61,7 @@ export class Healthbar {
 
     // Draw a colored rectangle to represent health
     this.bar.fillRect(
-      this.config.position.x,
+      this.config.position.x + 30,
       this.config.position.y,
       length,
       Healthbar.WIDTH
