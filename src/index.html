@@ -1,13 +1,22 @@
 <html>
   <head>
     <style>
+      @font-face {
+        font-family: 'VCR';
+        src: url('../public/fonts/vcr.ttf');
+      }
       body {
         margin: 0px;
+        background-color: black;
+        font-family: 'VCR' !important;
       }
     </style>
     <title>Beat of the Dead Horse</title>
   </head>
   <body id="phaser">
+    <div style="font-family: VCR; position: absolute; visibility: hidden">
+      .
+    </div>
     <script src="main.ts"></script>
     <script src="jsx-dom-shim.ts"></script>
   </body>

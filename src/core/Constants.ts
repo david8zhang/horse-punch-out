@@ -1,5 +1,7 @@
 import { BeatQuality } from './BeatTracker'
 
+export const DEFAULT_FONT = 'VCR'
+
 export const WINDOW_WIDTH = 800
 export const WINDOW_HEIGHT = 600
 
@@ -23,3 +25,7 @@ export const PLAYER_DAMAGE_MAPPING = {
 }
 
 export const ENEMY_DAMAGE = 25
+
+export const MUSIC_BPM_MAPPING = {
+  100: ['unwritten'],
+}

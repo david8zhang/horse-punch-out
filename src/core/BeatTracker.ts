@@ -1,5 +1,10 @@
 import Game, { AttackPhase } from '~/scenes/Game'
-import { SORT_ORDER, WINDOW_HEIGHT, WINDOW_WIDTH } from './Constants'
+import {
+  MUSIC_BPM_MAPPING,
+  SORT_ORDER,
+  WINDOW_HEIGHT,
+  WINDOW_WIDTH,
+} from './Constants'
 
 // Do something on each beat (with either +/- ms delay)
 export interface BeatListenerConfig {
@@ -60,6 +65,7 @@ export class BeatTracker {
   }
 
   pause() {
+    this.game.sound.stopAll()
     this.beatEvent.paused = true
     this.beatTrackerUITweens.forEach((tween) => {
       tween.pause()
@@ -67,7 +73,15 @@ export class BeatTracker {
     })
   }
 
+  getRandomSongForBPM() {
+    const songList = MUSIC_BPM_MAPPING[this.game.bpm]
+    const randSong = songList[Phaser.Math.Between(0, songList.length - 1)]
+    return randSong ? randSong : 'unwritten'
+  }
+
   start() {
+    // const randSong = this.getRandomSongForBPM()
+    // this.game.sound.play(randSong)
     this.beatEvent.paused = false
     this.beatTrackerUITweens.forEach((tween) => {
       tween.resume()

@@ -4,12 +4,12 @@ export class Preload extends Phaser.Scene {
   }
 
   preload() {
-    // Load assets here!
-    // Game Over
-    this.load.image('gameover', 'gameover/gameover.png')
+    this.load.image('gameover', 'ui/gameover.png')
+    this.load.image('heart', 'ui/heart.png')
+    this.load.audio('unwritten', 'music/unwritten.mp3')
   }
 
   create() {
-    this.scene.start('game')
+    this.scene.start('start')
   }
 }
