@@ -1,5 +1,6 @@
 import { BeatQuality } from './BeatTracker'
 
+export const DEFAULT_BPM = 100
 export const DEFAULT_FONT = 'VCR'
 
 export const WINDOW_WIDTH = 800
@@ -19,9 +20,9 @@ export const SORT_ORDER = {
 }
 
 export const PLAYER_DAMAGE_MAPPING = {
-  [BeatQuality.EARLY]: 10,
-  [BeatQuality.LATE]: 10,
-  [BeatQuality.PERFECT]: 20,
+  [BeatQuality.EARLY]: 5,
+  [BeatQuality.LATE]: 5,
+  [BeatQuality.PERFECT]: 10,
 }
 
 export const ENEMY_DAMAGE = 25

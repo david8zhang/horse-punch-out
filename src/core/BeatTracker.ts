@@ -80,8 +80,8 @@ export class BeatTracker {
   }
 
   start() {
-    // const randSong = this.getRandomSongForBPM()
-    // this.game.sound.play(randSong)
+    const randSong = this.getRandomSongForBPM()
+    this.game.sound.play(randSong)
     this.beatEvent.paused = false
     this.beatTrackerUITweens.forEach((tween) => {
       tween.resume()

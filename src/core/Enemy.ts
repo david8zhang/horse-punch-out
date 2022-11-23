@@ -27,7 +27,7 @@ export class Enemy {
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
   private static readonly PUNCH_DURATION = 50
-  public static readonly MAX_HEALTH = 100
+  public static readonly MAX_HEALTH = 500
 
   private readonly RIGHT_FIST_POSITION: number
   private readonly LEFT_FIST_POSITION: number

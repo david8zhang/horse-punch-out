@@ -14,7 +14,7 @@ export class Player {
   private static readonly BODY_WIDTH = 100
   private static readonly BODY_HEIGHT = 250
   private static readonly FIST_RADIUS = 40
-  public static readonly MAX_HEALTH = 100
+  public static readonly MAX_HEALTH = 500
 
   private game: Game
   private body: Phaser.GameObjects.Rectangle

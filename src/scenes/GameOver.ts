@@ -57,7 +57,7 @@ export default class GameOver extends Phaser.Scene {
         gameScene.registry.destroy()
         gameScene.scene.restart()
         gameScene.sound.removeAll()
-        this.scene.start('game', { shouldSkipTutorial: true })
+        this.scene.start('game')
       })
     domElementsContainer.add(restartButtonDom)
     domElementsContainer.setAlpha(0)

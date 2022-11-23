@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import {
+  DEFAULT_BPM,
   DEFAULT_FONT,
   Direction,
   ENEMY_DAMAGE,
@@ -40,6 +41,10 @@ export default class Game extends Phaser.Scene {
 
   constructor() {
     super('game')
+  }
+
+  init() {
+    this.bpm = DEFAULT_BPM
   }
 
   create() {
@@ -284,7 +289,7 @@ export default class Game extends Phaser.Scene {
     this.currPlayerActions = -3
 
     // Restart the beat tracker
-    this.bpm += 10
+    // this.bpm += 10
     this.beatTracker.restart(this.bpm)
 
     // Increase the enemy's max health
