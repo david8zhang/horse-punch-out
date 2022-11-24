@@ -1,4 +1,5 @@
 import Game from '~/scenes/Game'
+import { SORT_ORDER } from './Constants'
 
 export interface HealthbarConfig {
   position: {
@@ -27,7 +28,7 @@ export class Healthbar {
 
     // Draw bar
     this.bar = new Phaser.GameObjects.Graphics(this.scene)
-    this.bar.setDepth(1000)
+    this.bar.setDepth(SORT_ORDER.ui)
     this.scene.add.existing(this.bar)
     this.draw()
 

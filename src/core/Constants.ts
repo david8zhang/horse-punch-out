@@ -1,6 +1,6 @@
 import { BeatQuality } from './BeatTracker'
 
-export const DEFAULT_BPM = 100
+export const DEFAULT_BPM = 110
 export const DEFAULT_FONT = 'VCR'
 
 export const WINDOW_WIDTH = 800
@@ -17,6 +17,7 @@ export const SORT_ORDER = {
   body: 300,
   fist: 400,
   ui: 500,
+  top: 600,
 }
 
 export const PLAYER_DAMAGE_MAPPING = {

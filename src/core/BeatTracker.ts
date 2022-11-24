@@ -65,6 +65,7 @@ export class BeatTracker {
   }
 
   pause() {
+    this.hide()
     this.game.sound.stopAll()
     this.beatEvent.paused = true
     this.beatTrackerUITweens.forEach((tween) => {
@@ -73,15 +74,8 @@ export class BeatTracker {
     })
   }
 
-  getRandomSongForBPM() {
-    const songList = MUSIC_BPM_MAPPING[this.game.bpm]
-    const randSong = songList[Phaser.Math.Between(0, songList.length - 1)]
-    return randSong ? randSong : 'unwritten'
-  }
-
   start() {
-    const randSong = this.getRandomSongForBPM()
-    this.game.sound.play(randSong)
+    this.show()
     this.beatEvent.paused = false
     this.beatTrackerUITweens.forEach((tween) => {
       tween.resume()
@@ -97,6 +91,21 @@ export class BeatTracker {
     this.beatEvent.destroy()
     this.initBeatAndUI()
     this.start()
+    this.background.setFillStyle(
+      this.game.currAttackPhase === AttackPhase.PLAYER ? 0x00ff00 : 0xff0000
+    )
+  }
+
+  hide() {
+    this.allCircles.forEach((circle) => {
+      circle.setVisible(false)
+    })
+  }
+
+  show() {
+    this.allCircles.forEach((circle) => {
+      circle.setVisible(true)
+    })
   }
 
   handlePhaseSwitch(newAttackPhase: AttackPhase) {

@@ -12,7 +12,10 @@ import {
 import { Enemy } from '~/core/Enemy'
 import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
-import { button } from '~/ui/Button'
+import YoutubePlayer from 'youtube-player'
+import { YouTubePlayer } from 'youtube-player/dist/types'
+import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
+import { formInput } from '~/ui/Input'
 
 export enum AttackPhase {
   PLAYER,
@@ -25,7 +28,15 @@ export default class Game extends Phaser.Scene {
   public beatTracker!: BeatTracker
   public currAttackPhase: AttackPhase = AttackPhase.ENEMY
 
-  public bpm = 100
+  // Embedded youtube video UI
+  public searchInputDom!: Phaser.GameObjects.DOMElement
+  public searchInput: any
+  public youtubePlayer!: YouTubePlayer
+  public searchingYoutubeText!: Phaser.GameObjects.Text
+  public youtubeSearchBarBg!: Phaser.GameObjects.Rectangle
+  public isPlaying: boolean = false
+
+  public bpm = 120
 
   // track number of enemy attacks before player can attack
   public numEnemyActionsBeforeSwitch: number = 10
@@ -47,7 +58,71 @@ export default class Game extends Phaser.Scene {
     this.bpm = DEFAULT_BPM
   }
 
+  createLinkInputElement() {
+    this.youtubeSearchBarBg = this.add
+      .rectangle(
+        WINDOW_WIDTH / 2,
+        WINDOW_HEIGHT / 2,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        0x000000
+      )
+      .setDepth(SORT_ORDER.top)
+    this.searchingYoutubeText = this.add.text(
+      WINDOW_WIDTH / 2,
+      WINDOW_HEIGHT / 2,
+      'Loading...'
+    )
+    this.searchingYoutubeText
+      .setPosition(
+        this.searchingYoutubeText.x -
+          this.searchingYoutubeText.displayWidth / 2,
+        this.searchingYoutubeText.y -
+          this.searchingYoutubeText.displayHeight / 2 -
+          50
+      )
+      .setStyle({
+        fontFamily: 'VCR',
+        color: 'white',
+        fontSize: '30px',
+      })
+      .setDepth(SORT_ORDER.top)
+      .setVisible(false)
+    this.searchInput = formInput() as HTMLElement
+    this.searchInputDom = this.add
+      .dom(this.scale.width / 2, this.scale.height / 2 + 30, this.searchInput)
+      .setOrigin(0.5)
+    this.input.keyboard.on('keydown', (e) => {
+      if (e.code === 'Enter' && !this.isPlaying) {
+        this.searchInputDom.setVisible(false)
+        this.searchingYoutubeText.setVisible(true)
+        const inputValue: string = (this.searchInput as any).value
+        const url = new URL(inputValue)
+        if (url.searchParams.get('v')) {
+          const youtubeSongId = url.searchParams.get('v') as string
+          this.youtubePlayer.loadVideoById(youtubeSongId)
+          this.youtubePlayer.playVideo()
+        }
+      }
+    })
+  }
+
+  createYoutubePlayer() {
+    this.youtubePlayer = YoutubePlayer('player')
+    this.youtubePlayer.on('stateChange', (event) => {
+      if (event.data === PlayerStates.PLAYING) {
+        this.isPlaying = true
+        this.searchingYoutubeText.setVisible(false)
+        this.youtubeSearchBarBg.setVisible(false)
+        this.restart()
+      }
+    })
+  }
+
   create() {
+    this.domElementsContainer = this.add.container(0, 0).setVisible(false)
+    this.createYoutubePlayer()
+    this.createLinkInputElement()
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
@@ -76,32 +151,7 @@ export default class Game extends Phaser.Scene {
     this.beatTracker.addBeatListener(() => {
       this.handleOnBeatForAttackPhase()
     })
-    this.beatTracker.start()
-    this.startPhaseSwitchCountdown()
-    this.createButtonDOM()
   }
-
-  createButtonDOM() {
-    this.domElementsContainer = this.add.container(0, 0).setVisible(false)
-    const restartButton = button('Next Level', {
-      fontSize: '20px',
-      color: 'black',
-      fontFamily: DEFAULT_FONT,
-      width: 150,
-      height: 40,
-    }) as HTMLElement
-
-    const restartButtonDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 2 + 30, restartButton)
-      .setOrigin(0.5)
-      .addListener('click')
-      .on('click', () => {
-        this.restart()
-        this.domElementsContainer.setVisible(false)
-      })
-    this.domElementsContainer.add(restartButtonDom)
-  }
-
   handleOnBeatForAttackPhase() {
     if (this.currAttackPhase === AttackPhase.ENEMY) {
       if (this.currEnemyActions >= this.numEnemyActionsBeforeSwitch) {
@@ -265,6 +315,7 @@ export default class Game extends Phaser.Scene {
   }
 
   gameOver() {
+    this.youtubePlayer.stopVideo()
     this.beatTracker.pause()
     this.currAttackPhase = AttackPhase.PLAYER
     this.currEnemyActions = -3
@@ -275,14 +326,15 @@ export default class Game extends Phaser.Scene {
   }
 
   handleDefeatedEnemy() {
+    this.isPlaying = false
+    this.youtubePlayer.stopVideo()
+    this.searchInputDom.setVisible(true)
+    this.youtubeSearchBarBg.setVisible(true)
     this.beatTracker.pause()
-    this.input.keyboard.manager.enabled = false
     this.domElementsContainer.setVisible(true)
   }
 
   restart() {
-    this.input.keyboard.manager.enabled = true
-
     // Reset the attack phase counters
     this.currAttackPhase = AttackPhase.ENEMY
     this.currEnemyActions = -3
