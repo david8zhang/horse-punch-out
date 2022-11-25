@@ -16,7 +16,7 @@ export class Preload extends Phaser.Scene {
   }
 
   loadSprites() {
-    const variants = ['hit', 'dodge', 'windup', 'direction']
+    const variants = ['hit', 'dodge', 'windup', 'punch']
     const directions = ['left', 'right']
     variants.forEach((variant) => {
       directions.forEach((dir) => {

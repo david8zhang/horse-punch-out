@@ -90,7 +90,7 @@ export default class Game extends Phaser.Scene {
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
-        y: WINDOW_HEIGHT - 50,
+        y: WINDOW_HEIGHT - 150,
       },
     })
     this.player.onDied.push(this.gameOver.bind(this))
@@ -102,20 +102,22 @@ export default class Game extends Phaser.Scene {
       },
     })
     this.enemy.onDied.push(this.handleDefeatedEnemy.bind(this))
-    this.enemy.onPunch.push((punchDirection: Direction) => {
-      // TODO: put this logic somewhere else (probably in player class)
-      if (this.player.currDodgeDirection == punchDirection) {
-        // player successfully dodged
-      } else {
-        // got punched
-        this.player.damage(ENEMY_DAMAGE)
-        this.cameras.main.shake(150, 0.005)
-      }
-    })
+    this.enemy.onPunch.push(this.player.handleEnemyPunch.bind(this.player))
     this.beatTracker.addBeatListener(() => {
       this.handleOnBeatForAttackPhase()
     })
+    // Debug start instantly
+    //   this.searchInputDom.setVisible(false)
+    //   const url = new URL(
+    //     'https://www.youtube.com/watch?v=qchPLaiKocI&list=PLpYEFY_ybyEMGgjq-ZGcxOM64sIVNg1Dr&index=10'
+    //   )
+    //   if (url.searchParams.get('v')) {
+    //     const youtubeSongId = url.searchParams.get('v') as string
+    //     this.youtubePlayer.loadVideoById(youtubeSongId)
+    //     this.youtubePlayer.playVideo()
+    //   }
   }
+
   handleOnBeatForAttackPhase() {
     if (this.currAttackPhase === AttackPhase.ENEMY) {
       if (this.currEnemyActions >= this.numEnemyActionsBeforeSwitch) {

@@ -1,5 +1,10 @@
 import Game from '~/scenes/Game'
-import { Direction, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
+import {
+  Direction,
+  ENEMY_DAMAGE,
+  WINDOW_HEIGHT,
+  WINDOW_WIDTH,
+} from '~/core/Constants'
 import { SORT_ORDER } from './Constants'
 import { Healthbar } from './Healthbar'
 
@@ -17,9 +22,7 @@ export class Player {
   public static readonly MAX_HEALTH = 500
 
   private game: Game
-  private body: Phaser.GameObjects.Rectangle
-  private rightFist: Phaser.GameObjects.Arc
-  private leftFist: Phaser.GameObjects.Arc
+  private sprite: Phaser.GameObjects.Sprite
 
   public currDodgeDirection: Direction = Direction.NONE
   public currPunchDirection: Direction = Direction.NONE
@@ -36,31 +39,9 @@ export class Player {
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
     const { position } = config
-    this.body = this.game.add
-      .rectangle(
-        position.x,
-        position.y,
-        Player.BODY_WIDTH,
-        Player.BODY_HEIGHT,
-        0xffdbac
-      )
-      .setDepth(SORT_ORDER.body)
-    this.rightFist = this.game.add
-      .circle(
-        position.x + this.body.width,
-        position.y,
-        Player.FIST_RADIUS,
-        0x00ff00
-      )
-      .setDepth(SORT_ORDER.fist)
-    this.leftFist = this.game.add
-      .circle(
-        position.x - this.body.width,
-        position.y,
-        Player.FIST_RADIUS,
-        0x00ff00
-      )
-      .setDepth(SORT_ORDER.fist)
+    this.sprite = game.add.sprite(position.x, position.y, 'player-windup-left')
+    this.sprite.setScale(0.5)
+
     this.initKeyPressListener()
     this.setupHealthbar()
   }
@@ -115,39 +96,25 @@ export class Player {
       return
     }
     this.currDodgeDirection = direction
-    let bodyAngle = 0
     let bodyTranslatePos = 0
-    let fistTranslatePos = 0
     if (direction === Direction.RIGHT) {
-      bodyAngle = 60
-      bodyTranslatePos = 50
-      fistTranslatePos = 100
+      bodyTranslatePos = 80
     } else if (direction === Direction.LEFT) {
-      bodyAngle = -60
-      bodyTranslatePos = -50
-      fistTranslatePos = -100
+      bodyTranslatePos = -80
     }
+    const duration = 60000 / this.game.bpm / 2
+    this.playAnimation(
+      `player-dodge-${direction === Direction.LEFT ? 'left' : 'right'}`,
+      duration,
+      () => (this.currDodgeDirection = Direction.NONE)
+    )
     this.game.tweens.add({
-      targets: [this.body],
-      angle: {
-        from: 0,
-        to: bodyAngle,
-      },
-      y: `+=${Math.abs(bodyTranslatePos)}`,
+      targets: [this.sprite],
+      y: `+=${Math.abs(bodyTranslatePos / 2)}`,
       x: `+=${bodyTranslatePos}`,
       ease: 'Cubic',
-      duration: 200,
+      duration: duration / 2,
       yoyo: true,
-    })
-    this.game.tweens.add({
-      targets: [this.leftFist, this.rightFist],
-      x: `+=${fistTranslatePos}`,
-      ease: 'Cubic.easeInOut',
-      duration: 200,
-      yoyo: true,
-      onComplete: () => {
-        this.currDodgeDirection = Direction.NONE
-      },
     })
   }
 
@@ -166,32 +133,35 @@ export class Player {
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()
     }
-
     this.prevPunchDirection = direction
     this.currPunchDirection = direction
-    const fistToMove =
-      direction === Direction.LEFT ? this.leftFist : this.rightFist
-    const bodyAngle = direction === Direction.LEFT ? 10 : -10
-    const bodyPos = direction === Direction.LEFT ? 50 : -50
+    const duration = 60000 / this.game.bpm / 2
+    this.playAnimation(
+      `player-punch-${direction === Direction.LEFT ? 'left' : 'right'}`,
+      duration,
+      () => (this.currPunchDirection = Direction.NONE)
+    )
     this.game.tweens.add({
-      targets: [this.body],
-      angle: {
-        from: 0,
-        to: bodyAngle,
-      },
-      duration: 100,
+      targets: [this.sprite],
+      ease: 'Cubic.easeOut',
+      y: `-=${10}`,
+      duration: duration / 2,
       yoyo: true,
     })
-    this.game.tweens.add({
-      targets: [fistToMove],
-      y: '-=300',
-      x: `+=${bodyPos}`,
-      duration: 100,
-      yoyo: true,
-      onComplete: () => {
-        this.currPunchDirection = Direction.NONE
-      },
-    })
+  }
+
+  handleEnemyPunch(punchDirection: Direction) {
+    if (this.currDodgeDirection == punchDirection) {
+      // player successfully dodged
+    } else {
+      const duration = 60000 / this.game.bpm / 2
+      this.playAnimation(
+        `player-hit-${punchDirection === Direction.LEFT ? 'right' : 'left'}`,
+        duration
+      )
+      this.damage(ENEMY_DAMAGE)
+      this.game.cameras.main.shake(150, 0.005)
+    }
   }
 
   damage(damageAmt: number) {
@@ -200,5 +170,21 @@ export class Player {
     if (this.health <= 0) {
       this.onDied.forEach((handler) => handler())
     }
+  }
+
+  playAnimation(
+    animationName: string,
+    duration: number,
+    onAnimationFinished?: () => void
+  ) {
+    this.sprite.setTexture(animationName)
+    // reset to idle pose
+    setTimeout(() => {
+      this.sprite.setTexture(
+        `player-windup-${Math.random() > 0.5 ? 'right' : 'left'}`
+      )
+      this.currPunchDirection = Direction.NONE
+      onAnimationFinished?.()
+    }, duration)
   }
 }
