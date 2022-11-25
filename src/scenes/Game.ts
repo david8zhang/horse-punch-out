@@ -77,7 +77,10 @@ export default class Game extends Phaser.Scene {
     this.youtubePlayer.on('stateChange', (event) => {
       if (event.data === PlayerStates.PLAYING) {
         this.isPlaying = true
-        this.restart()
+        const delay = 500 // tweak this to make songs sync better
+        setTimeout(() => {
+          this.restart()
+        }, delay)
       }
     })
   }
@@ -98,7 +101,7 @@ export default class Game extends Phaser.Scene {
     this.enemy = new Enemy(this, {
       position: {
         x: WINDOW_WIDTH / 2,
-        y: WINDOW_HEIGHT - 400,
+        y: WINDOW_HEIGHT - 325,
       },
     })
     this.enemy.onDied.push(this.handleDefeatedEnemy.bind(this))
@@ -107,15 +110,15 @@ export default class Game extends Phaser.Scene {
       this.handleOnBeatForAttackPhase()
     })
     // Debug start instantly
-    //   this.searchInputDom.setVisible(false)
-    //   const url = new URL(
-    //     'https://www.youtube.com/watch?v=qchPLaiKocI&list=PLpYEFY_ybyEMGgjq-ZGcxOM64sIVNg1Dr&index=10'
-    //   )
-    //   if (url.searchParams.get('v')) {
-    //     const youtubeSongId = url.searchParams.get('v') as string
-    //     this.youtubePlayer.loadVideoById(youtubeSongId)
-    //     this.youtubePlayer.playVideo()
-    //   }
+    // this.searchInputDom.setVisible(false)
+    // const url = new URL(
+    //   'https://www.youtube.com/watch?v=qchPLaiKocI&list=PLpYEFY_ybyEMGgjq-ZGcxOM64sIVNg1Dr&index=10'
+    // )
+    // if (url.searchParams.get('v')) {
+    //   const youtubeSongId = url.searchParams.get('v') as string
+    //   this.youtubePlayer.loadVideoById(youtubeSongId)
+    //   this.youtubePlayer.playVideo()
+    // }
   }
 
   handleOnBeatForAttackPhase() {

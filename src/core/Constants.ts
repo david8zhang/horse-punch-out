@@ -14,8 +14,8 @@ export enum Direction {
 
 export const SORT_ORDER = {
   background: 100,
-  body: 300,
-  fist: 400,
+  enemy: 300,
+  player: 400,
   ui: 500,
   top: 600,
 }
