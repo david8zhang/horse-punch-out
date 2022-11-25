@@ -26,7 +26,7 @@ export class Preload extends Phaser.Scene {
         )
         this.load.image(
           `enemy-${variant}-${dir}`,
-          `sprites/player-${variant}-${dir}.png`
+          `sprites/enemy-${variant}-${dir}.png`
         )
       })
     })

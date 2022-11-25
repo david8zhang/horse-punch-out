@@ -41,6 +41,7 @@ export class Player {
     const { position } = config
     this.sprite = game.add.sprite(position.x, position.y, 'player-windup-left')
     this.sprite.setScale(0.5)
+    this.sprite.setDepth(SORT_ORDER.player)
 
     this.initKeyPressListener()
     this.setupHealthbar()

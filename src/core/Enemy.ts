@@ -1,6 +1,7 @@
 import Game from '~/scenes/Game'
 import { Direction, SORT_ORDER } from '~/core/Constants'
 import { Healthbar } from './Healthbar'
+import { RIGHT } from 'phaser'
 
 export interface EnemyConfig {
   position: {
@@ -23,14 +24,8 @@ export enum EnemyAction {
 }
 
 export class Enemy {
-  private static readonly BODY_WIDTH = 100
-  private static readonly BODY_HEIGHT = 250
-  private static readonly FIST_RADIUS = 40
-  private static readonly PUNCH_DURATION = 50
   public static readonly MAX_HEALTH = 500
 
-  private readonly RIGHT_FIST_POSITION: number
-  private readonly LEFT_FIST_POSITION: number
   private readonly BODY_POSITION: { x: number; y: number }
   public onPunch: Array<(dir: Direction) => void> = []
   public onDied: Array<() => void> = []
@@ -41,9 +36,7 @@ export class Enemy {
 
   // renderer
   private game: Game
-  private body: Phaser.GameObjects.Rectangle
-  private rightFist: Phaser.GameObjects.Arc
-  private leftFist: Phaser.GameObjects.Arc
+  private sprite: Phaser.GameObjects.Sprite
 
   // Health
   public maxHealth: number = Enemy.MAX_HEALTH
@@ -55,24 +48,14 @@ export class Enemy {
     this.game = game
     const { position } = config
     this.BODY_POSITION = position
-    this.body = this.game.add
-      .rectangle(
-        position.x,
-        position.y,
-        Enemy.BODY_WIDTH,
-        Enemy.BODY_HEIGHT,
-        0x11dbac
-      )
-      .setDepth(SORT_ORDER.body)
-    this.RIGHT_FIST_POSITION = position.x + this.body.width
-    this.rightFist = this.game.add
-      .circle(this.RIGHT_FIST_POSITION, position.y, Enemy.FIST_RADIUS, 0xff0000)
-      .setDepth(SORT_ORDER.fist)
-    this.LEFT_FIST_POSITION = position.x - this.body.width
-    this.leftFist = this.game.add
-      .circle(this.LEFT_FIST_POSITION, position.y, Enemy.FIST_RADIUS, 0xff0000)
-      .setDepth(SORT_ORDER.fist)
     this.setupHealthBar()
+    this.sprite = this.game.add.sprite(
+      position.x,
+      position.y,
+      'enemy-windup-left'
+    )
+    this.sprite.setScale(0.5)
+    this.sprite.setDepth(SORT_ORDER.enemy)
   }
 
   setupHealthBar() {
@@ -111,14 +94,18 @@ export class Enemy {
     if (currState !== EnemyArmState.IDLE) {
       return
     }
+
+    const duration = 60000 / this.game.bpm / 2
     this.setState(direction, EnemyArmState.WINDING_UP)
-    const fistToMove =
-      direction === Direction.LEFT ? this.leftFist : this.rightFist
+
+    const bodyAngle = direction === Direction.LEFT ? 10 : -10
     this.game.tweens.add({
-      targets: [fistToMove],
-      y: '-= 50',
-      ease: 'Quad.easeInOut',
-      duration: 50,
+      targets: [this.sprite],
+      angle: {
+        from: 0,
+        to: bodyAngle,
+      },
+      duration: duration,
       onComplete: () => {
         this.setState(direction, EnemyArmState.WIND_UP_COMPLETE)
       },
@@ -131,51 +118,45 @@ export class Enemy {
     if (currState != EnemyArmState.WIND_UP_COMPLETE) {
       return
     }
+
+    const duration = 60000 / this.game.bpm / 3
     this.setState(direction, EnemyArmState.PUNCHING)
-    const fistToMove =
-      direction === Direction.LEFT ? this.leftFist : this.rightFist
-    const bodyAngle = direction === Direction.LEFT ? -10 : 10
-    const bodyPos = direction === Direction.LEFT ? 150 : -150
+    const bodyAngle = direction === Direction.LEFT ? -50 : 50
+    const bodyPos = direction === Direction.LEFT ? 90 : -90
 
     this.game.tweens.add({
-      targets: [this.body],
-      angle: {
-        from: 0,
-        to: bodyAngle,
-      },
-      duration: Enemy.PUNCH_DURATION,
-      yoyo: true,
-    })
-    this.game.tweens.add({
-      targets: [fistToMove],
-      y: '+=400',
+      targets: [this.sprite],
+      angle: bodyAngle,
+      y: '+=100',
       x: `+=${bodyPos}`,
-      ease: 'Quint.easeIn',
-      duration: Enemy.PUNCH_DURATION, // this is like an "grace period" (in addition to the wind up) giving players time to react to the punch animation, larger number = more lenient
+      duration: duration,
+      ease: 'Quint.easeOut',
       onComplete: () => {
-        // punch when fist reaches end
         this.punch(direction)
       },
     })
   }
 
   punch(direction: Direction) {
-    const fistToMove =
-      direction === Direction.LEFT ? this.leftFist : this.rightFist
+    const duration = 60000 / this.game.bpm / 2
     // broadcast punch
     this.onPunch.forEach((handler) => handler(direction))
+
+    this.sprite.setTexture(
+      `enemy-punch-${direction == Direction.LEFT ? 'left' : 'right'}`
+    )
+    setTimeout(() => {
+      this.setState(direction, EnemyArmState.IDLE)
+      this.sprite.setTexture('enemy-windup-left')
+    }, duration)
+
     this.game.tweens.add({
-      targets: [fistToMove],
-      x:
-        fistToMove === this.rightFist
-          ? this.RIGHT_FIST_POSITION
-          : this.LEFT_FIST_POSITION,
+      targets: [this.sprite],
+      angle: 0,
+      x: this.BODY_POSITION.x,
       y: this.BODY_POSITION.y,
-      duration: 150, // punch recovery time
-      ease: 'Quint.easeInOut',
-      onComplete: () => {
-        this.setState(direction, EnemyArmState.IDLE)
-      },
+      ease: 'Quint.easeIn',
+      duration: duration,
     })
   }
 
