@@ -12,8 +12,11 @@ import {
 import { Enemy } from '~/core/Enemy'
 import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
+// @ts-ignore
 import YoutubePlayer from 'youtube-player'
+// @ts-ignore
 import { YouTubePlayer } from 'youtube-player/dist/types'
+// @ts-ignore
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
 import { formInput } from '~/ui/Input'
 
