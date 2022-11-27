@@ -58,7 +58,7 @@ export default class Game extends Phaser.Scene {
     this.bpm = DEFAULT_BPM
   }
 
-  createLinkInputElement() {
+  createYoutubeSearchUI() {
     this.youtubeSearchBarBg = this.add
       .rectangle(
         WINDOW_WIDTH / 2,
@@ -90,7 +90,7 @@ export default class Game extends Phaser.Scene {
       .setVisible(false)
     this.searchInput = formInput() as HTMLElement
     this.searchInputDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 2 + 30, this.searchInput)
+      .dom(this.scale.width / 2, this.scale.height - 50, this.searchInput)
       .setOrigin(0.5)
     this.input.keyboard.on('keydown', (e) => {
       if (e.code === 'Enter' && !this.isPlaying) {
@@ -122,7 +122,7 @@ export default class Game extends Phaser.Scene {
   create() {
     this.domElementsContainer = this.add.container(0, 0).setVisible(false)
     this.createYoutubePlayer()
-    this.createLinkInputElement()
+    this.createYoutubeSearchUI()
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
