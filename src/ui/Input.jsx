@@ -7,9 +7,9 @@ export const formInput = () => {
         padding: '10px 10px',
         fontFamily: 'VCR',
         fontSize: '20px',
-        width: WINDOW_WIDTH - 20,
+        width: `${WINDOW_WIDTH - 150}px`,
       }}
-      placeholder={`Enter a Youtube link for a ${DEFAULT_BPM} BPM song...`}
+      placeholder="Enter a Youtube link for your own song!"
     />
   )
 }

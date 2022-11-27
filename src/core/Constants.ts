@@ -1,6 +1,6 @@
 import { BeatQuality } from './BeatTracker'
 
-export const DEFAULT_BPM = 110
+export const DEFAULT_BPM = 100
 export const DEFAULT_FONT = 'VCR'
 
 export const WINDOW_WIDTH = 800
@@ -29,5 +29,14 @@ export const PLAYER_DAMAGE_MAPPING = {
 export const ENEMY_DAMAGE = 25
 
 export const MUSIC_BPM_MAPPING = {
-  100: ['unwritten'],
+  100: [
+    {
+      name: 'Unwritten - Natasha Bedingfield',
+      link: 'https://www.youtube.com/watch?v=vRQb_-mRcAc&ab_channel=7clouds',
+    },
+    {
+      name: "Hips Don't Lie - Shakira feat. Wycleaf Jean",
+      link: 'https://www.youtube.com/watch?v=JDjunuWB3Jo&ab_channel=PizzaMusic',
+    },
+  ],
 }
