@@ -32,7 +32,7 @@ export class Start extends Phaser.Scene {
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {
-        this.scene.start('song-select')
+        this.scene.start('game')
       })
     domElementsContainer.add(restartButtonDom)
   }

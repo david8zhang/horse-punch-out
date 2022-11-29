@@ -16,6 +16,7 @@ import YoutubePlayer from 'youtube-player'
 import { YouTubePlayer } from 'youtube-player/dist/types'
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
 import { formInput } from '~/ui/Input'
+import { SongSelect } from '~/core/SongSelect'
 
 export enum AttackPhase {
   PLAYER,
@@ -29,14 +30,12 @@ export default class Game extends Phaser.Scene {
   public currAttackPhase: AttackPhase = AttackPhase.ENEMY
 
   // Embedded youtube video UI
-  public searchInputDom!: Phaser.GameObjects.DOMElement
-  public searchInput: any
   public youtubePlayer!: YouTubePlayer
-  public searchingYoutubeText!: Phaser.GameObjects.Text
-  public youtubeSearchBarBg!: Phaser.GameObjects.Rectangle
   public isPlaying: boolean = false
+  public selectedSong: string = ''
+  public songSelectMenu!: SongSelect
 
-  public bpm = 120
+  public bpm = DEFAULT_BPM
 
   // track number of enemy attacks before player can attack
   public numEnemyActionsBeforeSwitch: number = 10
@@ -54,57 +53,20 @@ export default class Game extends Phaser.Scene {
     super('game')
   }
 
-  init() {
+  init(data) {
+    if (data && data.selectedSong) {
+      this.selectedSong = data.selectedSong
+    }
     this.bpm = DEFAULT_BPM
   }
 
-  createYoutubeSearchUI() {
-    this.youtubeSearchBarBg = this.add
-      .rectangle(
-        WINDOW_WIDTH / 2,
-        WINDOW_HEIGHT / 2,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        0x000000
-      )
-      .setDepth(SORT_ORDER.top)
-    this.searchingYoutubeText = this.add.text(
-      WINDOW_WIDTH / 2,
-      WINDOW_HEIGHT / 2,
-      'Loading...'
-    )
-    this.searchingYoutubeText
-      .setPosition(
-        this.searchingYoutubeText.x -
-          this.searchingYoutubeText.displayWidth / 2,
-        this.searchingYoutubeText.y -
-          this.searchingYoutubeText.displayHeight / 2 -
-          50
-      )
-      .setStyle({
-        fontFamily: 'VCR',
-        color: 'white',
-        fontSize: '30px',
-      })
-      .setDepth(SORT_ORDER.top)
-      .setVisible(false)
-    this.searchInput = formInput() as HTMLElement
-    this.searchInputDom = this.add
-      .dom(this.scale.width / 2, this.scale.height - 50, this.searchInput)
-      .setOrigin(0.5)
-    this.input.keyboard.on('keydown', (e) => {
-      if (e.code === 'Enter' && !this.isPlaying) {
-        this.searchInputDom.setVisible(false)
-        this.searchingYoutubeText.setVisible(true)
-        const inputValue: string = (this.searchInput as any).value
-        const url = new URL(inputValue)
-        if (url.searchParams.get('v')) {
-          const youtubeSongId = url.searchParams.get('v') as string
-          this.youtubePlayer.loadVideoById(youtubeSongId)
-          this.youtubePlayer.playVideo()
-        }
-      }
-    })
+  selectSong(songLink: string) {
+    const url = new URL(songLink)
+    if (url.searchParams.get('v')) {
+      const youtubeSongId = url.searchParams.get('v') as string
+      this.youtubePlayer.loadVideoById(youtubeSongId)
+      this.youtubePlayer.playVideo()
+    }
   }
 
   createYoutubePlayer() {
@@ -112,8 +74,6 @@ export default class Game extends Phaser.Scene {
     this.youtubePlayer.on('stateChange', (event) => {
       if (event.data === PlayerStates.PLAYING) {
         this.isPlaying = true
-        this.searchingYoutubeText.setVisible(false)
-        this.youtubeSearchBarBg.setVisible(false)
         this.restart()
       }
     })
@@ -121,8 +81,9 @@ export default class Game extends Phaser.Scene {
 
   create() {
     this.domElementsContainer = this.add.container(0, 0).setVisible(false)
+    this.songSelectMenu = new SongSelect(this, this.bpm)
+    this.songSelectMenu.showSongListForBPM(this.bpm)
     this.createYoutubePlayer()
-    this.createYoutubeSearchUI()
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
@@ -328,10 +289,10 @@ export default class Game extends Phaser.Scene {
   handleDefeatedEnemy() {
     this.isPlaying = false
     this.youtubePlayer.stopVideo()
-    this.searchInputDom.setVisible(true)
-    this.youtubeSearchBarBg.setVisible(true)
     this.beatTracker.pause()
     this.domElementsContainer.setVisible(true)
+    this.bpm += 10
+    this.songSelectMenu.showSongListForBPM(this.bpm)
   }
 
   restart() {
@@ -341,7 +302,6 @@ export default class Game extends Phaser.Scene {
     this.currPlayerActions = -3
 
     // Restart the beat tracker
-    // this.bpm += 10
     this.beatTracker.restart(this.bpm)
 
     // Increase the enemy's max health
