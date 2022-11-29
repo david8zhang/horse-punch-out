@@ -21,9 +21,9 @@ export const SORT_ORDER = {
 }
 
 export const PLAYER_DAMAGE_MAPPING = {
-  [BeatQuality.EARLY]: 5,
-  [BeatQuality.LATE]: 5,
-  [BeatQuality.PERFECT]: 10,
+  [BeatQuality.EARLY]: 10,
+  [BeatQuality.LATE]: 10,
+  [BeatQuality.PERFECT]: 20,
 }
 
 export const ENEMY_DAMAGE = 25
@@ -37,6 +37,10 @@ export const MUSIC_BPM_MAPPING = {
     {
       name: "Hips Don't Lie - Shakira feat. Wycleaf Jean",
       link: 'https://www.youtube.com/watch?v=JDjunuWB3Jo&ab_channel=PizzaMusic',
+    },
+    {
+      name: 'Man in the Mirror - Michael Jackson',
+      link: 'https://www.youtube.com/watch?v=Z9NYDgbKsBE',
     },
   ],
 }
