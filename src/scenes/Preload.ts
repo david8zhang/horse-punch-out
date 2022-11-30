@@ -16,6 +16,15 @@ export class Preload extends Phaser.Scene {
   }
 
   loadSprites() {
+    this.load.image(
+      'enemy-punch-windup-left',
+      'sprites/enemy-punch-windup-left.png'
+    )
+    this.load.image(
+      'enemy-punch-windup-right',
+      'sprites/enemy-punch-windup-right.png'
+    )
+    this.load.image('enemy-idle', 'sprites/enemy-idle.png')
     const variants = ['hit', 'dodge', 'windup', 'punch']
     const directions = ['left', 'right']
     variants.forEach((variant) => {

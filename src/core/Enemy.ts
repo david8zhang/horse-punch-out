@@ -49,11 +49,7 @@ export class Enemy {
     const { position } = config
     this.BODY_POSITION = position
     this.setupHealthBar()
-    this.sprite = this.game.add.sprite(
-      position.x,
-      position.y,
-      'enemy-windup-left'
-    )
+    this.sprite = this.game.add.sprite(position.x, position.y, 'enemy-idle')
     this.sprite.setScale(0.5)
     this.sprite.setDepth(SORT_ORDER.enemy)
   }
@@ -96,19 +92,24 @@ export class Enemy {
     }
 
     const duration = 60000 / this.game.bpm / 2
-    this.setState(direction, EnemyArmState.WINDING_UP)
 
-    const bodyAngle = direction === Direction.LEFT ? 10 : -10
-    this.game.tweens.add({
-      targets: [this.sprite],
-      angle: {
-        from: 0,
-        to: bodyAngle,
-      },
-      duration: duration,
-      onComplete: () => {
-        this.setState(direction, EnemyArmState.WIND_UP_COMPLETE)
-      },
+    const otherState = this.getState(
+      direction === Direction.LEFT ? Direction.RIGHT : Direction.LEFT
+    )
+    if (otherState !== EnemyArmState.PUNCHING) {
+      this.sprite.setTexture(`enemy-windup-${direction.toLowerCase()}`)
+      this.game.tweens.add({
+        targets: [this.sprite],
+        y: '-=10',
+        duration: duration,
+        onComplete: () => {
+          this.setState(direction, EnemyArmState.WIND_UP_COMPLETE)
+        },
+      })
+    }
+    this.setState(direction, EnemyArmState.WINDING_UP)
+    this.game.time.delayedCall(duration, () => {
+      this.setState(direction, EnemyArmState.WIND_UP_COMPLETE)
     })
   }
 
@@ -121,14 +122,15 @@ export class Enemy {
 
     const duration = 60000 / this.game.bpm / 3
     this.setState(direction, EnemyArmState.PUNCHING)
-    const bodyAngle = direction === Direction.LEFT ? -50 : 50
+    this.game.time.delayedCall(duration, () => {
+      this.punch(direction)
+    })
     const bodyPos = direction === Direction.LEFT ? 90 : -90
-
+    this.sprite.setTexture(`enemy-punch-${direction.toLowerCase()}`)
     this.game.tweens.add({
       targets: [this.sprite],
-      angle: bodyAngle,
-      y: '+=100',
       x: `+=${bodyPos}`,
+      y: '+=100',
       duration: duration,
       ease: 'Quint.easeOut',
       onComplete: () => {
@@ -142,17 +144,21 @@ export class Enemy {
     // broadcast punch
     this.onPunch.forEach((handler) => handler(direction))
 
-    this.sprite.setTexture(
-      `enemy-punch-${direction == Direction.LEFT ? 'left' : 'right'}`
+    const otherState = this.getState(
+      direction === Direction.LEFT ? Direction.RIGHT : Direction.LEFT
     )
+    if (otherState === EnemyArmState.WINDING_UP) {
+      this.sprite.setTexture(`enemy-punch-windup-${direction.toLowerCase()}`)
+    } else {
+      this.sprite.setTexture(`enemy-punch-${direction.toLowerCase()}`)
+    }
     setTimeout(() => {
       this.setState(direction, EnemyArmState.IDLE)
-      this.sprite.setTexture('enemy-windup-left')
+      this.sprite.setTexture('enemy-idle')
     }, duration)
 
     this.game.tweens.add({
       targets: [this.sprite],
-      angle: 0,
       x: this.BODY_POSITION.x,
       y: this.BODY_POSITION.y,
       ease: 'Quint.easeIn',
@@ -230,8 +236,23 @@ export class Enemy {
     this.handleAction(rightAction, Direction.RIGHT)
   }
 
-  damage(damageAmt: number) {
+  takeDamage(damageAmt: number, playerPunchDirection: Direction) {
     this.health -= damageAmt
+    const hitDirection =
+      playerPunchDirection == Direction.LEFT ? 'right' : 'left'
+    const texture = `enemy-hit-${hitDirection}`
+    this.sprite.setTexture(texture)
+    const delay = 60000 / (this.game.bpm * 2)
+    this.game.tweens.add({
+      targets: [this.sprite],
+      y: '-=15',
+      yoyo: true,
+      duration: delay / 2,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        this.sprite.setTexture('enemy-idle')
+      },
+    })
     this.onHealthChanged.forEach((handler) => handler())
     if (this.health <= 0) {
       this.onDied.forEach((handler) => handler())

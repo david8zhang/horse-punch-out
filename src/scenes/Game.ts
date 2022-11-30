@@ -3,7 +3,6 @@ import {
   DEFAULT_BPM,
   DEFAULT_FONT,
   Direction,
-  ENEMY_DAMAGE,
   PLAYER_DAMAGE_MAPPING,
   SORT_ORDER,
   WINDOW_HEIGHT,
@@ -27,6 +26,7 @@ export enum AttackPhase {
 }
 
 export default class Game extends Phaser.Scene {
+  public delay: number = 0
   public player!: Player
   public enemy!: Enemy
   public beatTracker!: BeatTracker
@@ -63,11 +63,11 @@ export default class Game extends Phaser.Scene {
     this.bpm = DEFAULT_BPM
   }
 
-  selectSong(songLink: string) {
+  selectSong(songLink: string, delay: number) {
     const url = new URL(songLink)
     if (url.searchParams.get('v')) {
       const youtubeSongId = url.searchParams.get('v') as string
-      this.youtubePlayer.loadVideoById(youtubeSongId)
+      this.youtubePlayer.loadVideoById(youtubeSongId, delay)
       this.youtubePlayer.playVideo()
     }
   }
@@ -75,12 +75,9 @@ export default class Game extends Phaser.Scene {
   createYoutubePlayer() {
     this.youtubePlayer = YoutubePlayer('player')
     this.youtubePlayer.on('stateChange', (event) => {
-      if (event.data === PlayerStates.PLAYING) {
+      if (event.data === PlayerStates.PLAYING && !this.isPlaying) {
         this.isPlaying = true
-        const delay = 500 // tweak this to make songs sync better
-        setTimeout(() => {
-          this.restart()
-        }, delay)
+        this.restart()
       }
     })
   }
@@ -109,16 +106,6 @@ export default class Game extends Phaser.Scene {
     this.beatTracker.addBeatListener(() => {
       this.handleOnBeatForAttackPhase()
     })
-    // Debug start instantly
-    // this.searchInputDom.setVisible(false)
-    // const url = new URL(
-    //   'https://www.youtube.com/watch?v=qchPLaiKocI&list=PLpYEFY_ybyEMGgjq-ZGcxOM64sIVNg1Dr&index=10'
-    // )
-    // if (url.searchParams.get('v')) {
-    //   const youtubeSongId = url.searchParams.get('v') as string
-    //   this.youtubePlayer.loadVideoById(youtubeSongId)
-    //   this.youtubePlayer.playVideo()
-    // }
   }
 
   handleOnBeatForAttackPhase() {
@@ -246,10 +233,13 @@ export default class Game extends Phaser.Scene {
     })
   }
 
-  handlePlayerAttack(beatQuality: BeatQuality) {
+  handlePlayerAttack(
+    beatQuality: BeatQuality,
+    playerPunchDirection: Direction
+  ) {
     this.cameras.main.shake(150, 0.005)
     const damageToDeal = PLAYER_DAMAGE_MAPPING[beatQuality]
-    this.enemy.damage(damageToDeal)
+    this.enemy.takeDamage(damageToDeal, playerPunchDirection)
 
     const beatQualityText = this.add
       .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, beatQuality)
@@ -301,6 +291,9 @@ export default class Game extends Phaser.Scene {
     this.domElementsContainer.setVisible(true)
     this.bpm += 10
     this.songSelectMenu.showSongListForBPM(this.bpm)
+    // Increase the enemy's max health
+    this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
+    this.enemy.reset()
   }
 
   restart() {
@@ -311,11 +304,6 @@ export default class Game extends Phaser.Scene {
 
     // Restart the beat tracker
     this.beatTracker.restart(this.bpm)
-
-    // Increase the enemy's max health
-    this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
-    this.enemy.reset()
-
     this.startPhaseSwitchCountdown()
   }
 }

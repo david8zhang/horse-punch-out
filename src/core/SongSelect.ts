@@ -107,7 +107,7 @@ export class SongSelect {
       .on('click', () => {
         this.hide()
         const link = (searchInput as any).value
-        this.game.selectSong(link)
+        this.game.selectSong(link, 0)
       })
     this.container.add(bg)
     this.container.add(buttonDom)
@@ -152,7 +152,7 @@ export class SongSelect {
           .setInteractive({ useHandCursor: true })
           .on('pointerdown', () => {
             this.hide()
-            this.game.selectSong(song.link)
+            this.game.selectSong(song.link, song.delay)
           })
           .setDepth(SORT_ORDER.top + 100)
         this.songOptions.push(songText)
