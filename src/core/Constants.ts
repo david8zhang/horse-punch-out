@@ -1,6 +1,6 @@
 import { BeatQuality } from './BeatTracker'
 
-export const DEFAULT_BPM = 100
+export const DEFAULT_BPM = 120
 export const DEFAULT_FONT = 'VCR'
 
 export const WINDOW_WIDTH = 800
@@ -41,6 +41,48 @@ export const MUSIC_BPM_MAPPING = {
     {
       name: 'Man in the Mirror - Michael Jackson',
       link: 'https://www.youtube.com/watch?v=Z9NYDgbKsBE',
+    },
+  ],
+  110: [
+    {
+      name: 'Hollaback Girl - Gwen Stefani',
+      link: 'https://www.youtube.com/watch?v=_jAAixDgHhM',
+    },
+    {
+      name: 'Wannabe - Spice Girls',
+      link: 'https://www.youtube.com/watch?v=HNehiNC_tq0',
+      delay: 4,
+    },
+    {
+      name: 'Another One Bites the Dust - Queen',
+      link: 'https://www.youtube.com/watch?v=kwwaWVP2PGE',
+      delay: 1,
+    },
+  ],
+  120: [
+    {
+      name: 'Tik Tok - Ke$ha',
+      link: 'https://www.youtube.com/watch?v=OF04pKp-r9o',
+    },
+    {
+      name: 'Call Me Maybe - Carly Rae Jepsen',
+      link: 'https://www.youtube.com/watch?v=FUVwhKsfHiE',
+    },
+    {
+      name: "It's My Life - Bon Jovi",
+      link: 'https://www.youtube.com/watch?v=ZXfLxqsNO4s',
+    },
+    {
+      name: 'Dynamite - Taio Cruz',
+      link: 'https://www.youtube.com/watch?v=2JUNnKmZhqA',
+    },
+    {
+      name: 'Forever - Chris Brown',
+      link: 'https://www.youtube.com/watch?v=-s6dlaOrnIg',
+    },
+    {
+      name: "Don't Cha - Pussycat Dolls",
+      link: 'https://www.youtube.com/watch?v=5w-lMYTc7fU',
     },
   ],
 }

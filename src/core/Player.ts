@@ -126,16 +126,15 @@ export class Player {
     ) {
       return
     }
-
+    this.prevPunchDirection = direction
+    this.currPunchDirection = direction
     if (this.game.beatTracker.isOnBeat) {
       const beatQuality = this.game.beatTracker.beatQuality
-      this.game.handlePlayerAttack(beatQuality)
+      this.game.handlePlayerAttack(beatQuality, this.currPunchDirection)
     } else {
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()
     }
-    this.prevPunchDirection = direction
-    this.currPunchDirection = direction
     const duration = 60000 / this.game.bpm / 2
     this.playAnimation(
       `player-punch-${direction === Direction.LEFT ? 'left' : 'right'}`,
@@ -160,12 +159,12 @@ export class Player {
         `player-hit-${punchDirection === Direction.LEFT ? 'right' : 'left'}`,
         duration
       )
-      this.damage(ENEMY_DAMAGE)
+      this.takeDamage(ENEMY_DAMAGE)
       this.game.cameras.main.shake(150, 0.005)
     }
   }
 
-  damage(damageAmt: number) {
+  takeDamage(damageAmt: number) {
     this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
     if (this.health <= 0) {
