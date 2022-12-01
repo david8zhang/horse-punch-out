@@ -1,9 +1,17 @@
+import { YouTubePlayer } from 'youtube-player/dist/types'
 import { DEFAULT_FONT, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
 import { button } from '~/ui/Button'
 
 export class Start extends Phaser.Scene {
+  public youtubePlayer: YouTubePlayer | null = null
   constructor() {
     super('start')
+  }
+
+  init(data) {
+    if (data.youtubePlayer) {
+      this.youtubePlayer = data.youtubePlayer
+    }
   }
 
   create() {
@@ -41,7 +49,9 @@ export class Start extends Phaser.Scene {
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {
-        this.scene.start('cutscene')
+        this.scene.start('cutscene', {
+          youtubePlayer: this.youtubePlayer,
+        })
       })
 
     const customSong = button('Freestyle', {
@@ -61,7 +71,11 @@ export class Start extends Phaser.Scene {
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {
-        this.scene.start('game', { skipTutorial: true, isFreestyle: true })
+        this.scene.start('game', {
+          skipTutorial: true,
+          isFreestyle: true,
+          youtubePlayer: this.youtubePlayer,
+        })
       })
   }
 }

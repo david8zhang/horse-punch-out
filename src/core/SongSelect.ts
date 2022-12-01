@@ -73,7 +73,7 @@ export class SongSelect {
 
   showSongListForBPM(bpm: number) {
     this.container.setVisible(true)
-    this.bpmText.setText(`BPM: ${bpm}`)
+    this.bpmText.setText(`${bpm} BPM`)
     this.tempoText.setPosition(
       WINDOW_WIDTH / 2 -
         (this.tempoText.displayWidth + this.bpmText.displayWidth) / 2,

@@ -68,13 +68,5 @@ export const MUSIC_BPM_MAPPING = {
       name: 'Uptempo Beats',
       link: 'https://www.youtube.com/watch?v=MvSMBdCxT8I',
     },
-    {
-      name: 'Fairy Tale',
-      link: 'https://www.youtube.com/watch?v=b2WX_O1YwHk',
-    },
-    {
-      name: 'Zumba Zumba',
-      link: 'https://www.youtube.com/watch?v=Qv11UYhq2j0',
-    },
   ],
 }

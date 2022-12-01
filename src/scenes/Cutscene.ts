@@ -1,8 +1,17 @@
+import { YouTubePlayer } from 'youtube-player/dist/types'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
 
 export class Cutscene extends Phaser.Scene {
+  public youtubePlayer: YouTubePlayer | null = null
+
   constructor() {
     super('cutscene')
+  }
+
+  init(data) {
+    if (data.youtubePlayer) {
+      this.youtubePlayer = data.youtubePlayer
+    }
   }
 
   create() {
@@ -13,7 +22,10 @@ export class Cutscene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', (e) => {
       if (e.code === 'Space') {
-        this.scene.start('game', { skipTutorial: true })
+        this.scene.start('game', {
+          skipTutorial: true,
+          youtubePlayer: this.youtubePlayer,
+        })
       }
     })
 
@@ -82,7 +94,9 @@ export class Cutscene extends Phaser.Scene {
                     bgImage.setTexture(img4)
                   },
                   onComplete: () => {
-                    this.scene.start('game')
+                    this.scene.start('game', {
+                      youtubePlayer: this.youtubePlayer,
+                    })
                   },
                 })
               },

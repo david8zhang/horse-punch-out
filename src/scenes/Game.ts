@@ -402,20 +402,24 @@ export default class Game extends Phaser.Scene {
     })
 
     this.time.delayedCall(5000, () => {
-      this.youtubePlayer.stopVideo()
       // Increase the enemy's max health & BPM speed
       this.victoryText.setVisible(false)
       this.victoryTextBG.setVisible(false)
       if (this.bpm < 130) {
+        this.youtubePlayer.stopVideo()
         this.bpm += 10
+        if (this.songSelectMenu) {
+          this.songSelectMenu.showSongListForBPM(this.bpm)
+        } else if (this.customSongMenu) {
+          this.customSongMenu.show()
+        }
+        this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
+        this.enemy.reset()
+      } else {
+        this.scene.start('credits', {
+          youtubePlayer: this.youtubePlayer,
+        })
       }
-      if (this.songSelectMenu) {
-        this.songSelectMenu.showSongListForBPM(this.bpm)
-      } else if (this.customSongMenu) {
-        this.customSongMenu.show()
-      }
-      this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
-      this.enemy.reset()
     })
   }
 
