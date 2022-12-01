@@ -1,6 +1,6 @@
 import { BeatQuality } from './BeatTracker'
 
-export const DEFAULT_BPM = 120
+export const DEFAULT_BPM = 100
 export const DEFAULT_FONT = 'VCR'
 
 export const WINDOW_WIDTH = 800
@@ -83,6 +83,20 @@ export const MUSIC_BPM_MAPPING = {
     {
       name: "Don't Cha - Pussycat Dolls",
       link: 'https://www.youtube.com/watch?v=5w-lMYTc7fU',
+    },
+  ],
+  130: [
+    {
+      name: 'On The Floor - Jennifer Lopez',
+      link: 'https://www.youtube.com/watch?v=70XspGKI8kQ',
+    },
+    {
+      name: 'Pumped Up Kicks - Foster The People',
+      link: 'https://www.youtube.com/watch?v=k_aQYP8rsgE',
+    },
+    {
+      name: 'Party Rock Anthem - LMFAO',
+      link: 'https://www.youtube.com/watch?v=zIh5AHxh-Ok',
     },
   ],
 }
