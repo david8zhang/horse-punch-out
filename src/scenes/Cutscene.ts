@@ -1,11 +1,24 @@
+import { YouTubePlayer } from 'youtube-player/dist/types'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/Constants'
 
 export class Cutscene extends Phaser.Scene {
+  public youtubePlayer: YouTubePlayer | null = null
+
   constructor() {
     super('cutscene')
   }
 
+  init(data) {
+    if (data.youtubePlayer) {
+      this.youtubePlayer = data.youtubePlayer
+    }
+  }
+
   create() {
+    this.game.sound.stopByKey('splash-bgm')
+    this.game.sound.play('cutscene-early', {
+      volume: 0.4,
+    })
     const img1 = 'cutscene-1'
     const img2 = 'cutscene-2'
     const img3 = 'cutscene-3'
@@ -13,17 +26,24 @@ export class Cutscene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', (e) => {
       if (e.code === 'Space') {
-        this.scene.start('game')
+        this.game.sound.stopAll()
+        this.tweens.killAll()
+        this.scene.start('game', {
+          youtubePlayer: this.youtubePlayer,
+        })
       }
     })
 
     const bgImage = this.add
       .image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, img1)
       .setAlpha(0)
-    this.add.text(WINDOW_WIDTH, WINDOW_HEIGHT, 'Press Space Key to Skip', {
+    const skipText = this.add.text(WINDOW_WIDTH, WINDOW_HEIGHT, 'Skip', {
       fontSize: '20px',
       fontFamily: 'VCR',
     })
+    skipText.setPosition(WINDOW_WIDTH - skipText.displayWidth - 20, 35)
+    const spaceKey = this.add.image(skipText.x, 20, 'tutorial-prompt-keySpace')
+    spaceKey.setPosition(skipText.x - skipText.displayWidth - 20, 40)
     this.tweens.add({
       targets: bgImage,
       alpha: {
@@ -62,6 +82,10 @@ export class Cutscene extends Phaser.Scene {
               hold: 3000,
               yoyo: true,
               onStart: () => {
+                this.game.sound.stopAll()
+                this.game.sound.play('cutscene-later', {
+                  volume: 0.4,
+                })
                 bgImage.setTexture(img3)
               },
               onComplete: () => {
@@ -79,7 +103,10 @@ export class Cutscene extends Phaser.Scene {
                     bgImage.setTexture(img4)
                   },
                   onComplete: () => {
-                    this.scene.start('game')
+                    this.game.sound.stopAll()
+                    this.scene.start('game', {
+                      youtubePlayer: this.youtubePlayer,
+                    })
                   },
                 })
               },

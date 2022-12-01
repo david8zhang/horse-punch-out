@@ -9,6 +9,15 @@ export class Preload extends Phaser.Scene {
   }
 
   preload() {
+    // audio
+    this.load.audio('dodge', 'sfx/dodge.mp3')
+    this.load.audio('punch1', 'sfx/punch1.mp3')
+    this.load.audio('punch2', 'sfx/punch2.mp3')
+    this.load.audio('splash-bgm', 'music/splash-screen.mp3')
+    this.load.audio('cutscene-early', 'music/cutscene-early.mp3')
+    this.load.audio('cutscene-later', 'music/cutscene-later.mp3')
+    this.load.audio('tick', 'sfx/tick.ogg')
+
     // ui
     this.load.image('gameover', 'ui/gameover.png')
     this.load.image('heart', 'ui/heart.png')
@@ -43,6 +52,10 @@ export class Preload extends Phaser.Scene {
     this.load.on('progress', (percentComplete) => {
       const percentage = Math.round(percentComplete * 100)
       this.loadingText.setText(`Loading: ${percentage}%`)
+      this.loadingText.setPosition(
+        WINDOW_WIDTH / 2 - this.loadingText.displayWidth / 2,
+        WINDOW_HEIGHT / 2 - this.loadingText.displayHeight / 2
+      )
     })
   }
 

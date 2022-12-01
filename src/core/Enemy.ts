@@ -8,6 +8,7 @@ export interface EnemyConfig {
     x: number
     y: number
   }
+  hideHealthBar?: boolean
 }
 
 export enum EnemyArmState {
@@ -48,15 +49,15 @@ export class Enemy {
 
   constructor(game: Game, config: EnemyConfig) {
     this.game = game
-    const { position } = config
+    const { position, hideHealthBar } = config
     this.BODY_POSITION = position
-    this.setupHealthBar()
+    this.setupHealthBar(hideHealthBar)
     this.sprite = this.game.add.sprite(position.x, position.y, 'enemy-idle')
     this.sprite.setScale(0.75)
     this.sprite.setDepth(SORT_ORDER.enemy)
   }
 
-  setupHealthBar() {
+  setupHealthBar(hideHealthBar: boolean | undefined) {
     this.healthBar = new Healthbar(
       this.game,
       {
@@ -70,6 +71,9 @@ export class Enemy {
     this.onHealthChanged.push(() => {
       this.healthBar.draw()
     })
+    if (hideHealthBar) {
+      this.healthBar.hide()
+    }
   }
 
   setState(direction: Direction, newState: EnemyArmState) {
@@ -241,6 +245,8 @@ export class Enemy {
   }
 
   takeDamage(damageAmt: number, playerPunchDirection: Direction) {
+    const punchNoise = ['punch1', 'punch2'][Phaser.Math.Between(0, 1)]
+    this.game.sound.play(punchNoise)
     this.health -= damageAmt
     const hitDirection =
       playerPunchDirection == Direction.LEFT ? 'right' : 'left'

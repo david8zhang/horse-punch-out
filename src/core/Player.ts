@@ -14,6 +14,7 @@ export interface PlayerConfig {
     x: number
     y: number
   }
+  hideHealthBar?: boolean
 }
 
 export class Player {
@@ -42,16 +43,16 @@ export class Player {
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
-    const { position } = config
+    const { position, hideHealthBar } = config
     this.sprite = game.add.sprite(position.x, position.y, 'player-windup-left')
     this.sprite.setScale(0.75)
     this.sprite.setDepth(SORT_ORDER.player)
 
     this.initKeyPressListener()
-    this.setupHealthbar()
+    this.setupHealthbar(hideHealthBar)
   }
 
-  setupHealthbar() {
+  setupHealthbar(hideHealthBar: boolean | undefined) {
     this.healthBar = new Healthbar(
       this.game,
       {
@@ -65,6 +66,9 @@ export class Player {
     this.onDamaged.push(() => {
       this.healthBar.draw()
     })
+    if (hideHealthBar) {
+      this.healthBar.hide()
+    }
   }
 
   initKeyPressListener() {
@@ -100,6 +104,7 @@ export class Player {
     ) {
       return
     }
+    this.game.sound.play('dodge')
     this.currDodgeDirection = direction
     let bodyTranslatePos = 0
     if (direction === Direction.RIGHT) {
@@ -138,6 +143,7 @@ export class Player {
       this.game.handlePlayerAttack(beatQuality, this.currPunchDirection)
       this.onPunch.forEach((handler) => handler(beatQuality))
     } else {
+      this.game.sound.play('dodge')
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()
     }
@@ -169,12 +175,14 @@ export class Player {
         `player-hit-${punchDirection === Direction.LEFT ? 'right' : 'left'}`,
         duration
       )
-      this.takeDamage(enemyDamage)
+      this.takeDamage(this.game.isFreestyle ? 0 : enemyDamage)
       this.game.cameras.main.shake(150, 0.005)
     }
   }
 
   takeDamage(damageAmt: number) {
+    const punchNoise = ['punch1', 'punch2'][Phaser.Math.Between(0, 1)]
+    this.game.sound.play(punchNoise)
     this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
     if (this.health <= 0) {

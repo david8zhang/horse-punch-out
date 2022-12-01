@@ -128,6 +128,7 @@ export class Tutorial {
     this.setTitleText('Dodge to the beat!')
     this.game.beatTracker.restart(90)
     this.game.beatTracker.addBeatListener(() => {
+      this.game.sound.play('tick')
       this.enemy.onBeat(false)
       this.enemy.forbidDoublePunches = true
     })
@@ -152,6 +153,7 @@ export class Tutorial {
     this.setTitleText('Dodge faster punches!')
     this.game.beatTracker.restart(90)
     this.game.beatTracker.addBeatListener(() => {
+      this.game.sound.play('tick')
       this.enemy.onBeat(false)
       this.enemy.forbidDoublePunches = false
     })
@@ -204,6 +206,9 @@ export class Tutorial {
     this.setTitleText('Punch to the beat!')
     this.game.currAttackPhase = AttackPhase.PLAYER
     this.game.beatTracker.restart(90)
+    this.game.beatTracker.addBeatListener(() => {
+      this.game.sound.play('tick')
+    })
     this.game.beatTracker.alwaysPerfectBeat = false
     this.game.beatTracker.handlePhaseSwitch(AttackPhase.PLAYER)
     let punchCount = 0

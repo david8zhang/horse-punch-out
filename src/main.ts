@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { WINDOW_HEIGHT, WINDOW_WIDTH } from './core/Constants'
+import { Credits } from './scenes/Credits'
 import { Cutscene } from './scenes/Cutscene'
 import Game from './scenes/Game'
 import GameOver from './scenes/GameOver'
@@ -26,7 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [Preload, Cutscene, Start, Game, GameOver],
+  scene: [Preload, Cutscene, Start, Game, GameOver, Credits],
 }
 
 export default new Phaser.Game(config)
