@@ -11,6 +11,7 @@ import {
 import { Enemy } from '~/core/Enemy'
 import { BeatQuality, BeatTracker } from '~/core/BeatTracker'
 import { Player } from '~/core/Player'
+import { Tutorial } from '~/core/Tutorial'
 // @ts-ignore
 import YoutubePlayer from 'youtube-player'
 // @ts-ignore
@@ -30,6 +31,7 @@ export default class Game extends Phaser.Scene {
   public enemy!: Enemy
   public beatTracker!: BeatTracker
   public currAttackPhase: AttackPhase = AttackPhase.ENEMY
+  public skipTutorial!: boolean
 
   // Embedded youtube video UI
   public youtubePlayer!: YouTubePlayer
@@ -61,6 +63,7 @@ export default class Game extends Phaser.Scene {
     if (data) {
       this.selectedSong = data.selectedSong
       this.youtubePlayer = data.youtubePlayer
+      this.skipTutorial = data.skipTutorial ?? false
     }
     this.bpm = DEFAULT_BPM
   }
@@ -87,6 +90,33 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    if (!this.skipTutorial) {
+      this.initializeTutorial()
+    } else {
+      this.initializeGame()
+    }
+  }
+
+  initializeTutorial() {
+    this.player = new Player(this, {
+      position: {
+        x: WINDOW_WIDTH / 2,
+        y: WINDOW_HEIGHT - 150,
+      },
+    })
+    this.enemy = new Enemy(this, {
+      position: {
+        x: WINDOW_WIDTH / 2,
+        y: WINDOW_HEIGHT - 325,
+      },
+    })
+    this.bpm = 90
+    this.beatTracker = new BeatTracker(this, this.bpm)
+    this.beatTracker.pause()
+    new Tutorial(this, this.player, this.enemy)
+  }
+
+  initializeGame() {
     this.add
       .image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'fight-bg')
       .setDepth(SORT_ORDER.background)

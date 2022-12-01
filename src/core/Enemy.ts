@@ -26,7 +26,7 @@ export enum EnemyAction {
 export class Enemy {
   public static readonly MAX_HEALTH = 500
 
-  private readonly BODY_POSITION: { x: number; y: number }
+  public readonly BODY_POSITION: { x: number; y: number }
   public onPunch: Array<(dir: Direction) => void> = []
   public onDied: Array<() => void> = []
 
