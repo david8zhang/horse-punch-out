@@ -104,6 +104,7 @@ export class Player {
     ) {
       return
     }
+    this.game.sound.play('dodge')
     this.currDodgeDirection = direction
     let bodyTranslatePos = 0
     if (direction === Direction.RIGHT) {
@@ -142,6 +143,7 @@ export class Player {
       this.game.handlePlayerAttack(beatQuality, this.currPunchDirection)
       this.onPunch.forEach((handler) => handler(beatQuality))
     } else {
+      this.game.sound.play('dodge')
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()
     }
@@ -173,12 +175,14 @@ export class Player {
         `player-hit-${punchDirection === Direction.LEFT ? 'right' : 'left'}`,
         duration
       )
-      this.takeDamage(enemyDamage)
+      this.takeDamage(this.game.isFreestyle ? 0 : enemyDamage)
       this.game.cameras.main.shake(150, 0.005)
     }
   }
 
   takeDamage(damageAmt: number) {
+    const punchNoise = ['punch1', 'punch2'][Phaser.Math.Between(0, 1)]
+    this.game.sound.play(punchNoise)
     this.health -= damageAmt
     this.onDamaged.forEach((handler) => handler())
     if (this.health <= 0) {

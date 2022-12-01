@@ -15,6 +15,9 @@ export class Start extends Phaser.Scene {
   }
 
   create() {
+    this.game.sound.play('splash-bgm', {
+      volume: 0.4,
+    })
     const bgImage = this.add.image(
       WINDOW_WIDTH / 2,
       WINDOW_HEIGHT / 2,

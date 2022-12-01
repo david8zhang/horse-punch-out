@@ -15,6 +15,10 @@ export class Cutscene extends Phaser.Scene {
   }
 
   create() {
+    this.game.sound.stopByKey('splash-bgm')
+    this.game.sound.play('cutscene-early', {
+      volume: 0.4,
+    })
     const img1 = 'cutscene-1'
     const img2 = 'cutscene-2'
     const img3 = 'cutscene-3'
@@ -22,8 +26,9 @@ export class Cutscene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', (e) => {
       if (e.code === 'Space') {
+        this.game.sound.stopAll()
+        this.tweens.killAll()
         this.scene.start('game', {
-          skipTutorial: true,
           youtubePlayer: this.youtubePlayer,
         })
       }
@@ -77,6 +82,10 @@ export class Cutscene extends Phaser.Scene {
               hold: 3000,
               yoyo: true,
               onStart: () => {
+                this.game.sound.stopAll()
+                this.game.sound.play('cutscene-later', {
+                  volume: 0.4,
+                })
                 bgImage.setTexture(img3)
               },
               onComplete: () => {

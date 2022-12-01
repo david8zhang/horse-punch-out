@@ -245,6 +245,8 @@ export class Enemy {
   }
 
   takeDamage(damageAmt: number, playerPunchDirection: Direction) {
+    const punchNoise = ['punch1', 'punch2'][Phaser.Math.Between(0, 1)]
+    this.game.sound.play(punchNoise)
     this.health -= damageAmt
     const hitDirection =
       playerPunchDirection == Direction.LEFT ? 'right' : 'left'

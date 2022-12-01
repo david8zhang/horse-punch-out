@@ -91,6 +91,7 @@ export default class Game extends Phaser.Scene {
     this.youtubePlayer.on('stateChange', (event) => {
       if (event.data === PlayerStates.PLAYING && !this.isPlaying) {
         this.isPlaying = true
+        this.game.sound.stopAll()
         this.restart()
       }
       if (event.data === PlayerStates.ENDED) {
@@ -171,6 +172,7 @@ export default class Game extends Phaser.Scene {
         x: WINDOW_WIDTH / 2,
         y: WINDOW_HEIGHT - 210,
       },
+      hideHealthBar: this.isFreestyle,
     })
     this.player.onDied.push(this.gameOver.bind(this))
     this.beatTracker = new BeatTracker(this, this.bpm)

@@ -67,7 +67,6 @@ export class BeatTracker {
 
   pause() {
     this.hide()
-    this.game.sound.stopAll()
     this.beatEvent.paused = true
     this.beatTrackerUITweens.forEach((tween) => {
       tween.pause()

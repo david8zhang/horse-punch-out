@@ -48,6 +48,10 @@ export class Tutorial {
       this.teachPunchOnBeat.bind(this),
       this.promptStartGame.bind(this),
     ]
+    this.game.sound.play('splash-bgm', {
+      loop: true,
+      volume: 0.4,
+    })
     this.tutorialSteps[0]()
   }
 
