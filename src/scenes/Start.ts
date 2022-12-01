@@ -41,7 +41,7 @@ export class Start extends Phaser.Scene {
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {
-        this.scene.start('cutscene')
+        this.scene.start('game')
       })
   }
 }

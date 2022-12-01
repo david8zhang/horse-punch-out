@@ -98,10 +98,14 @@ export default class Game extends Phaser.Scene {
   }
 
   initializeTutorial() {
+    this.add
+      .image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'fight-bg')
+      .setDepth(SORT_ORDER.background)
+      .setAlpha(0.75)
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
-        y: WINDOW_HEIGHT - 150,
+        y: WINDOW_HEIGHT - 210,
       },
     })
     this.enemy = new Enemy(this, {

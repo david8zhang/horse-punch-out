@@ -38,6 +38,7 @@ export class Player {
   public onDied: Array<() => void> = []
   public onDodge: Array<(dir: Direction) => void> = []
   public onPunch: Array<(beatQuality: BeatQuality) => void> = []
+  public onDodgedPunch: Array<() => void> = []
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
@@ -106,7 +107,7 @@ export class Player {
     } else if (direction === Direction.LEFT) {
       bodyTranslatePos = -90
     }
-    const duration = 60000 / this.game.bpm / 2
+    const duration = 60000 / this.game.bpm / 1.5
     this.playAnimation(
       `player-dodge-${direction === Direction.LEFT ? 'left' : 'right'}`,
       duration,
@@ -155,16 +156,20 @@ export class Player {
     })
   }
 
-  handleEnemyPunch(punchDirection: Direction) {
+  handleEnemyPunch(
+    punchDirection: Direction,
+    enemyDamage: number = ENEMY_DAMAGE
+  ) {
     if (this.currDodgeDirection == punchDirection) {
       // player successfully dodged
+      this.onDodgedPunch.forEach((handler) => handler())
     } else {
       const duration = 60000 / this.game.bpm / 2
       this.playAnimation(
         `player-hit-${punchDirection === Direction.LEFT ? 'right' : 'left'}`,
         duration
       )
-      this.takeDamage(ENEMY_DAMAGE)
+      this.takeDamage(enemyDamage)
       this.game.cameras.main.shake(150, 0.005)
     }
   }
