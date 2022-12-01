@@ -29,6 +29,20 @@ export const PLAYER_DAMAGE_MAPPING = {
 export const ENEMY_DAMAGE = 25
 
 export const MUSIC_BPM_MAPPING = {
+  60: [
+    {
+      name: 'Tik Tok - Ke$ha',
+      link: 'https://www.youtube.com/watch?v=OF04pKp-r9o',
+    },
+    {
+      name: 'Call Me Maybe - Carly Rae Jepsen',
+      link: 'https://www.youtube.com/watch?v=FUVwhKsfHiE',
+    },
+    {
+      name: "It's My Life - Bon Jovi",
+      link: 'https://www.youtube.com/watch?v=ZXfLxqsNO4s',
+    },
+  ],
   100: [
     {
       name: 'Unwritten - Natasha Bedingfield',

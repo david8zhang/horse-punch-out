@@ -26,6 +26,8 @@ export enum EnemyAction {
 export class Enemy {
   public static readonly MAX_HEALTH = 500
 
+  public forbidDoublePunches: boolean = false
+
   public readonly BODY_POSITION: { x: number; y: number }
   public onPunch: Array<(dir: Direction) => void> = []
   public onDied: Array<() => void> = []
@@ -120,7 +122,7 @@ export class Enemy {
       return
     }
 
-    const duration = 60000 / this.game.bpm / 3
+    const duration = 60000 / this.game.bpm / 4
     this.setState(direction, EnemyArmState.PUNCHING)
     this.game.time.delayedCall(duration, () => {
       this.punch(direction)
@@ -133,9 +135,6 @@ export class Enemy {
       y: '+=100',
       duration: duration,
       ease: 'Quint.easeOut',
-      onComplete: () => {
-        this.punch(direction)
-      },
     })
   }
 
@@ -196,6 +195,11 @@ export class Enemy {
       }
       case EnemyArmState.IDLE: {
         if (otherState === EnemyArmState.WINDING_UP) {
+          return EnemyAction.PASS
+        } else if (
+          otherState === EnemyArmState.PUNCHING &&
+          this.forbidDoublePunches
+        ) {
           return EnemyAction.PASS
         }
         const possibleActions = [EnemyAction.WIND_UP, EnemyAction.PASS]
