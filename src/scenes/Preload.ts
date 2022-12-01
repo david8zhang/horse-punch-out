@@ -16,6 +16,7 @@ export class Preload extends Phaser.Scene {
     this.load.audio('splash-bgm', 'music/splash-screen.mp3')
     this.load.audio('cutscene-early', 'music/cutscene-early.mp3')
     this.load.audio('cutscene-later', 'music/cutscene-later.mp3')
+    this.load.audio('tick', 'sfx/tick.ogg')
 
     // ui
     this.load.image('gameover', 'ui/gameover.png')

@@ -103,6 +103,7 @@ export class Cutscene extends Phaser.Scene {
                     bgImage.setTexture(img4)
                   },
                   onComplete: () => {
+                    this.game.sound.stopAll()
                     this.scene.start('game', {
                       youtubePlayer: this.youtubePlayer,
                     })
