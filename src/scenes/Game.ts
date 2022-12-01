@@ -87,6 +87,10 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    this.add
+      .image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'fight-bg')
+      .setDepth(SORT_ORDER.background)
+      .setAlpha(0.75)
     this.victoryTextBG = this.add
       .rectangle(
         WINDOW_WIDTH / 2,
@@ -117,7 +121,7 @@ export default class Game extends Phaser.Scene {
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
-        y: WINDOW_HEIGHT - 140,
+        y: WINDOW_HEIGHT - 210,
       },
     })
     this.player.onDied.push(this.gameOver.bind(this))
@@ -310,7 +314,6 @@ export default class Game extends Phaser.Scene {
     this.currEnemyActions = -3
     this.currPlayerActions = -3
     this.scene.start('gameover', {
-      score: 0,
       youtubePlayer: this.youtubePlayer,
     })
   }
@@ -351,7 +354,9 @@ export default class Game extends Phaser.Scene {
       // Increase the enemy's max health & BPM speed
       this.victoryText.setVisible(false)
       this.victoryTextBG.setVisible(false)
-      this.bpm += 10
+      if (this.bpm < 130) {
+        this.bpm += 10
+      }
       this.songSelectMenu.showSongListForBPM(this.bpm)
       this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
       this.enemy.reset()

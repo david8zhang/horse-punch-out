@@ -50,7 +50,7 @@ export class Enemy {
     this.BODY_POSITION = position
     this.setupHealthBar()
     this.sprite = this.game.add.sprite(position.x, position.y, 'enemy-idle')
-    this.sprite.setScale(0.5)
+    this.sprite.setScale(0.75)
     this.sprite.setDepth(SORT_ORDER.enemy)
   }
 
