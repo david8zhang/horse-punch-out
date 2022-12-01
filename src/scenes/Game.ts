@@ -57,8 +57,9 @@ export default class Game extends Phaser.Scene {
   }
 
   init(data) {
-    if (data && data.selectedSong) {
+    if (data) {
       this.selectedSong = data.selectedSong
+      this.youtubePlayer = data.youtubePlayer
     }
     this.bpm = DEFAULT_BPM
   }
@@ -68,6 +69,7 @@ export default class Game extends Phaser.Scene {
     if (url.searchParams.get('v')) {
       const youtubeSongId = url.searchParams.get('v') as string
       this.youtubePlayer.loadVideoById(youtubeSongId, delay)
+      this.youtubePlayer.stopVideo()
       this.youtubePlayer.playVideo()
     }
   }
@@ -83,10 +85,13 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    this.isPlaying = false
     this.domElementsContainer = this.add.container(0, 0).setVisible(false)
     this.songSelectMenu = new SongSelect(this, this.bpm)
     this.songSelectMenu.showSongListForBPM(this.bpm)
-    this.createYoutubePlayer()
+    if (!this.youtubePlayer) {
+      this.createYoutubePlayer()
+    }
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
@@ -275,12 +280,14 @@ export default class Game extends Phaser.Scene {
 
   gameOver() {
     this.youtubePlayer.stopVideo()
+    this.isPlaying = false
     this.beatTracker.pause()
     this.currAttackPhase = AttackPhase.PLAYER
     this.currEnemyActions = -3
     this.currPlayerActions = -3
     this.scene.start('gameover', {
       score: 0,
+      youtubePlayer: this.youtubePlayer,
     })
   }
 

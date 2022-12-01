@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
 import { button } from '~/ui/Button'
 import { DEFAULT_FONT, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/constants'
+import { YouTubePlayer } from 'youtube-player/dist/types'
 
 export default class GameOver extends Phaser.Scene {
   private score = 0
+  public youtubePlayer!: YouTubePlayer
 
   constructor() {
     super('gameover')
@@ -12,6 +14,9 @@ export default class GameOver extends Phaser.Scene {
   init(data): void {
     if (data.score) {
       this.score = data.score
+    }
+    if (data.youtubePlayer) {
+      this.youtubePlayer = data.youtubePlayer
     }
   }
 
@@ -57,7 +62,7 @@ export default class GameOver extends Phaser.Scene {
         gameScene.registry.destroy()
         gameScene.scene.restart()
         gameScene.sound.removeAll()
-        this.scene.start('game')
+        this.scene.start('game', { youtubePlayer: this.youtubePlayer })
       })
     domElementsContainer.add(restartButtonDom)
     domElementsContainer.setAlpha(0)
