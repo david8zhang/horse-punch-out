@@ -98,5 +98,9 @@ export const MUSIC_BPM_MAPPING = {
       name: 'Party Rock Anthem - LMFAO',
       link: 'https://www.youtube.com/watch?v=zIh5AHxh-Ok',
     },
+    {
+      name: 'Timber - Pitbull ft. Kesha',
+      link: 'https://www.youtube.com/watch?v=zHESy8XsJPs',
+    },
   ],
 }

@@ -40,7 +40,7 @@ export class Player {
     this.game = game
     const { position } = config
     this.sprite = game.add.sprite(position.x, position.y, 'player-windup-left')
-    this.sprite.setScale(0.5)
+    this.sprite.setScale(0.75)
     this.sprite.setDepth(SORT_ORDER.player)
 
     this.initKeyPressListener()
@@ -99,9 +99,9 @@ export class Player {
     this.currDodgeDirection = direction
     let bodyTranslatePos = 0
     if (direction === Direction.RIGHT) {
-      bodyTranslatePos = 80
+      bodyTranslatePos = 90
     } else if (direction === Direction.LEFT) {
-      bodyTranslatePos = -80
+      bodyTranslatePos = -90
     }
     const duration = 60000 / this.game.bpm / 2
     this.playAnimation(

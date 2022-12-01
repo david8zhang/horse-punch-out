@@ -23,38 +23,22 @@ export default class GameOver extends Phaser.Scene {
   create(): void {
     this.cameras.main.fadeIn(2000, 1, 1, 1)
     const bg = this.add.image(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'gameover')
-    bg.setScale(2)
     const domElementsContainer = this.add.container(0, 0)
-    this.add
-      .text(this.scale.width / 2, this.scale.height / 3, 'GAME OVER')
-      .setStyle({
-        fontSize: '40px',
-        fontFamily: DEFAULT_FONT,
-      })
-      .setOrigin(0.5)
-
-    this.add
-      .text(
-        this.scale.width / 2,
-        this.scale.height / 3 + 50,
-        `Score: ${this.score}`
-      )
-      .setStyle({
-        fontSize: '40px',
-        fontFamily: DEFAULT_FONT,
-      })
-      .setOrigin(0.5)
-
     const restartButton = button('Play Again', {
       fontSize: '20px',
       fontFamily: DEFAULT_FONT,
       color: 'black',
       width: 150,
       height: 40,
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'black',
+      borderRadius: '10px',
+      cursor: 'pointer',
     }) as HTMLElement
 
     const restartButtonDom = this.add
-      .dom(this.scale.width / 2, this.scale.height / 2 + 30, restartButton)
+      .dom(this.scale.width / 2, this.scale.height / 2, restartButton)
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {

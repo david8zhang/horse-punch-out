@@ -36,6 +36,7 @@ export class Healthbar {
       .image(this.config.position.x + 10, this.config.position.y + 8, 'heart')
       .setTintFill(0xff0000)
       .setScale(0.5)
+      .setDepth(SORT_ORDER.ui)
   }
 
   draw(): void {

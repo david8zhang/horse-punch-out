@@ -11,8 +11,33 @@ export class Preload extends Phaser.Scene {
   preload() {
     this.load.image('gameover', 'ui/gameover.png')
     this.load.image('heart', 'ui/heart.png')
+    this.load.image('splash', 'ui/splash.png')
+    this.load.image('fight-bg', 'ui/fight-background.png')
+
+    this.load.image('cutscene-1', 'sprites/cutscene-1.png')
+    this.load.image('cutscene-2', 'sprites/cutscene-2.png')
+    this.load.image('cutscene-3', 'sprites/cutscene-3.png')
+    this.load.image('cutscene-4', 'sprites/cutscene-4.png')
+
     this.loadSprites()
-    this.scene.start('start')
+
+    this.loadingText = this.add.text(0, 0, 'Loading: 0%', {
+      fontSize: '30px',
+      fontFamily: 'VCR',
+    })
+    this.loadingText.setPosition(
+      WINDOW_WIDTH / 2 - this.loadingText.displayWidth / 2,
+      WINDOW_HEIGHT / 2 - this.loadingText.displayHeight / 2
+    )
+
+    this.load.on('complete', () => {
+      this.scene.start('start')
+    })
+
+    this.load.on('progress', (percentComplete) => {
+      const percentage = Math.round(percentComplete * 100)
+      this.loadingText.setText(`Loading: ${percentage}%`)
+    })
   }
 
   loadSprites() {
