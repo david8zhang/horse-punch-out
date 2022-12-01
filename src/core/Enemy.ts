@@ -242,17 +242,20 @@ export class Enemy {
       playerPunchDirection == Direction.LEFT ? 'right' : 'left'
     const texture = `enemy-hit-${hitDirection}`
     this.sprite.setTexture(texture)
-    const delay = 60000 / (this.game.bpm * 2)
+    const delay = this.health > 0 ? 60000 / (this.game.bpm * 4) : 5000
     this.game.tweens.add({
       targets: [this.sprite],
-      y: '-=15',
-      yoyo: true,
-      duration: delay / 2,
+      y: `-=${this.health > 0 ? 15 : 30}`,
+      yoyo: this.health > 0,
+      duration: delay,
       ease: 'Cubic.easeOut',
       onComplete: () => {
-        this.sprite.setTexture('enemy-idle')
+        if (this.health > 0) {
+          this.sprite.setTexture('enemy-idle')
+        }
       },
     })
+
     this.onHealthChanged.forEach((handler) => handler())
     if (this.health <= 0) {
       this.onDied.forEach((handler) => handler())
@@ -260,6 +263,8 @@ export class Enemy {
   }
 
   reset() {
+    this.sprite.setPosition(this.BODY_POSITION.x, this.BODY_POSITION.y)
+    this.sprite.setTexture('enemy-idle')
     this.health = this.maxHealth
     this.onHealthChanged.forEach((handler) => handler())
   }

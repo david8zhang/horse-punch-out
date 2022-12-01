@@ -17,7 +17,6 @@ import YoutubePlayer from 'youtube-player'
 import { YouTubePlayer } from 'youtube-player/dist/types'
 // @ts-ignore
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
-import { formInput } from '~/ui/Input'
 import { SongSelect } from '~/core/SongSelect'
 
 export enum AttackPhase {
@@ -50,7 +49,9 @@ export default class Game extends Phaser.Scene {
   public playerInputMiss: boolean = false
   public playerInputMissText!: Phaser.GameObjects.Text
 
-  public domElementsContainer!: Phaser.GameObjects.Container
+  // Victory Text
+  public victoryText!: Phaser.GameObjects.Text
+  public victoryTextBG!: Phaser.GameObjects.Rectangle
 
   constructor() {
     super('game')
@@ -65,6 +66,7 @@ export default class Game extends Phaser.Scene {
   }
 
   selectSong(songLink: string, delay: number) {
+    this.beatTracker.hide()
     const url = new URL(songLink)
     if (url.searchParams.get('v')) {
       const youtubeSongId = url.searchParams.get('v') as string
@@ -85,8 +87,28 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
-    this.isPlaying = false
-    this.domElementsContainer = this.add.container(0, 0).setVisible(false)
+    this.victoryTextBG = this.add
+      .rectangle(
+        WINDOW_WIDTH / 2,
+        WINDOW_HEIGHT / 2,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        0x000000
+      )
+      .setAlpha(0.5)
+      .setVisible(false)
+      .setDepth(SORT_ORDER.top)
+    this.victoryText = this.add
+      .text(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 'Victory!', {
+        fontFamily: DEFAULT_FONT,
+        fontSize: '40px',
+      })
+      .setVisible(false)
+      .setDepth(SORT_ORDER.top)
+    this.victoryText.setPosition(
+      this.victoryText.x - this.victoryText.displayWidth / 2,
+      this.victoryText.y
+    )
     this.songSelectMenu = new SongSelect(this, this.bpm)
     this.songSelectMenu.showSongListForBPM(this.bpm)
     if (!this.youtubePlayer) {
@@ -95,7 +117,7 @@ export default class Game extends Phaser.Scene {
     this.player = new Player(this, {
       position: {
         x: WINDOW_WIDTH / 2,
-        y: WINDOW_HEIGHT - 150,
+        y: WINDOW_HEIGHT - 140,
       },
     })
     this.player.onDied.push(this.gameOver.bind(this))
@@ -188,7 +210,9 @@ export default class Game extends Phaser.Scene {
 
   canPlayerAttack() {
     return (
-      this.currAttackPhase === AttackPhase.PLAYER && this.currPlayerActions >= 0
+      this.currAttackPhase === AttackPhase.PLAYER &&
+      this.currPlayerActions >= 0 &&
+      this.enemy.health > 0
     )
   }
 
@@ -293,14 +317,45 @@ export default class Game extends Phaser.Scene {
 
   handleDefeatedEnemy() {
     this.isPlaying = false
-    this.youtubePlayer.stopVideo()
+    // Hide beat tracker
+    this.beatTracker.hide()
     this.beatTracker.pause()
-    this.domElementsContainer.setVisible(true)
-    this.bpm += 10
-    this.songSelectMenu.showSongListForBPM(this.bpm)
-    // Increase the enemy's max health
-    this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
-    this.enemy.reset()
+
+    this.victoryText
+      .setAlpha(0)
+      .setVisible(true)
+      .setPosition(this.victoryText.x, this.victoryText.y - 20)
+    this.victoryTextBG.setAlpha(0).setVisible(true)
+    this.tweens.add({
+      targets: [this.victoryText],
+      alpha: {
+        from: 0,
+        to: 1,
+      },
+      y: '+=20',
+      delay: 1000,
+      duration: 2000,
+    })
+    this.tweens.add({
+      targets: [this.victoryTextBG],
+      alpha: {
+        from: 0,
+        to: 0.5,
+      },
+      delay: 1000,
+      duration: 2000,
+    })
+
+    this.time.delayedCall(5000, () => {
+      this.youtubePlayer.stopVideo()
+      // Increase the enemy's max health & BPM speed
+      this.victoryText.setVisible(false)
+      this.victoryTextBG.setVisible(false)
+      this.bpm += 10
+      this.songSelectMenu.showSongListForBPM(this.bpm)
+      this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
+      this.enemy.reset()
+    })
   }
 
   restart() {
@@ -310,6 +365,7 @@ export default class Game extends Phaser.Scene {
     this.currPlayerActions = -3
 
     // Restart the beat tracker
+    this.beatTracker.show()
     this.beatTracker.restart(this.bpm)
     this.startPhaseSwitchCountdown()
   }

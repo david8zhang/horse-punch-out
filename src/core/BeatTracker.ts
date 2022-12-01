@@ -83,7 +83,6 @@ export class BeatTracker {
   }
 
   restart(bpm: number) {
-    console.log(bpm)
     this.bpm = bpm
     this.beatTrackerUITweens.forEach((tween) => tween.stop())
     this.beatTrackerUITweens = []
