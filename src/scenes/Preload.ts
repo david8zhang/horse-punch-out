@@ -9,6 +9,7 @@ export class Preload extends Phaser.Scene {
   }
 
   preload() {
+    // ui
     this.load.image('gameover', 'ui/gameover.png')
     this.load.image('heart', 'ui/heart.png')
     this.load.image('splash', 'ui/splash.png')
@@ -18,6 +19,11 @@ export class Preload extends Phaser.Scene {
     this.load.image('cutscene-2', 'sprites/cutscene-2.png')
     this.load.image('cutscene-3', 'sprites/cutscene-3.png')
     this.load.image('cutscene-4', 'sprites/cutscene-4.png')
+
+    // tutorial
+    this.load.image('tutorial-prompt-keyA', 'tutorial/A_Key_Light.png')
+    this.load.image('tutorial-prompt-keyD', 'tutorial/D_Key_Light.png')
+    this.load.image('tutorial-prompt-keySpace', 'tutorial/Space_Key_Light.png')
 
     this.loadSprites()
 

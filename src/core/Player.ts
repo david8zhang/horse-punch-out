@@ -7,6 +7,7 @@ import {
 } from '~/core/Constants'
 import { SORT_ORDER } from './Constants'
 import { Healthbar } from './Healthbar'
+import { BeatQuality } from './BeatTracker'
 
 export interface PlayerConfig {
   position: {
@@ -35,6 +36,8 @@ export class Player {
 
   public onDamaged: Array<() => void> = []
   public onDied: Array<() => void> = []
+  public onDodge: Array<(dir: Direction) => void> = []
+  public onPunch: Array<(beatQuality: BeatQuality) => void> = []
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
@@ -117,6 +120,7 @@ export class Player {
       duration: duration / 2,
       yoyo: true,
     })
+    this.onDodge.forEach((handler) => handler(direction))
   }
 
   punch(direction: Direction) {
@@ -131,6 +135,7 @@ export class Player {
     if (this.game.beatTracker.isOnBeat) {
       const beatQuality = this.game.beatTracker.beatQuality
       this.game.handlePlayerAttack(beatQuality, this.currPunchDirection)
+      this.onPunch.forEach((handler) => handler(beatQuality))
     } else {
       // if the player misses an input, then attack phase goes back to the enemy
       this.game.onPlayerInputMiss()

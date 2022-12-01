@@ -44,7 +44,7 @@ export class SongSelect {
         searchingYoutubeText.y - searchingYoutubeText.displayHeight / 2 - 50
       )
       .setStyle({
-        fontFamily: 'VCR',
+        fontFamily: DEFAULT_FONT,
         color: 'white',
         fontSize: '30px',
       })
@@ -54,7 +54,7 @@ export class SongSelect {
     this.titleText = this.game.add
       .text(WINDOW_WIDTH / 2, 40, 'Song Select')
       .setStyle({
-        fontFamily: 'VCR',
+        fontFamily: DEFAULT_FONT,
         fontSize: '40px',
       })
     this.titleText.setPosition(
@@ -70,13 +70,13 @@ export class SongSelect {
         'Tempo: '
       )
       .setStyle({
-        fontFamily: 'VCR',
+        fontFamily: DEFAULT_FONT,
         fontSize: '20px',
       })
     this.bpmText = this.game.add
       .text(this.tempoText.x, this.tempoText.y, `${bpm} BPM`)
       .setStyle({
-        fontFamily: 'VCR',
+        fontFamily: DEFAULT_FONT,
         fontSize: '20px',
       })
     this.tempoText.setPosition(
@@ -147,7 +147,7 @@ export class SongSelect {
           .text(0, y, song.name)
           .setStyle({
             fontSize: '20px',
-            fontFamily: 'VCR',
+            fontFamily: DEFAULT_FONT,
           })
           .setInteractive({ useHandCursor: true })
           .on('pointerdown', () => {

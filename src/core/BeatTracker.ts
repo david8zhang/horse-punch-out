@@ -34,6 +34,7 @@ export class BeatTracker {
   public allCircles: Phaser.GameObjects.Arc[] = []
 
   public beatListeners: Array<() => void> = []
+  public alwaysPerfectBeat: boolean = false
   private lastBeatTimestamp: number = 0
 
   constructor(game: Game, bpm: number) {
@@ -215,6 +216,10 @@ export class BeatTracker {
   }
 
   get beatQuality(): BeatQuality {
+    if (this.alwaysPerfectBeat) {
+      return BeatQuality.PERFECT
+    }
+
     let currTimestamp = Date.now()
     if (this.middleCircle.visible) {
       // If the middle circle is already visible, beat quality can be perfect or late
@@ -235,6 +240,10 @@ export class BeatTracker {
   }
 
   get isOnBeat() {
+    if (this.alwaysPerfectBeat) {
+      return true
+    }
+
     if (this.middleCircle.visible) {
       return true
     } else {
