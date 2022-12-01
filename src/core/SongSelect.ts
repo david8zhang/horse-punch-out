@@ -7,8 +7,6 @@ import {
   WINDOW_WIDTH,
 } from '~/core/Constants'
 import Game from '~/scenes/Game'
-import { button } from '~/ui/Button'
-import { formInput } from '~/ui/Input'
 
 export class SongSelect {
   public static readonly SONG_PAGE_SIZE = 10
@@ -33,24 +31,6 @@ export class SongSelect {
       WINDOW_HEIGHT,
       0x000000
     )
-    const searchingYoutubeText = this.game.add.text(
-      WINDOW_WIDTH / 2,
-      WINDOW_HEIGHT / 2,
-      'Loading...'
-    )
-    searchingYoutubeText
-      .setPosition(
-        searchingYoutubeText.x - searchingYoutubeText.displayWidth / 2,
-        searchingYoutubeText.y - searchingYoutubeText.displayHeight / 2 - 50
-      )
-      .setStyle({
-        fontFamily: DEFAULT_FONT,
-        color: 'white',
-        fontSize: '30px',
-      })
-      .setDepth(SORT_ORDER.top)
-      .setVisible(false)
-
     this.titleText = this.game.add
       .text(WINDOW_WIDTH / 2, 40, 'Song Select')
       .setStyle({
@@ -84,38 +64,10 @@ export class SongSelect {
         (this.tempoText.displayWidth + this.bpmText.displayWidth) / 2,
       this.tempoText.y
     )
-    const searchInput = formInput() as HTMLElement
-    const searchInputDom = this.game.add
-      .dom(WINDOW_WIDTH / 2 - 75, this.game.scale.height - 40, searchInput)
-      .setOrigin(0.5)
-
-    const nextButton = button('Next', {
-      fontSize: '20px',
-      color: 'black',
-      fontFamily: DEFAULT_FONT,
-      width: 125,
-      height: 45,
-    }) as HTMLElement
-    const buttonDom = this.game.add
-      .dom(
-        searchInputDom.x + WINDOW_WIDTH / 2 + 5,
-        searchInputDom.y,
-        nextButton
-      )
-      .setOrigin(0.5)
-      .addListener('click')
-      .on('click', () => {
-        this.hide()
-        const link = (searchInput as any).value
-        this.game.selectSong(link, 0)
-      })
     this.container.add(bg)
-    this.container.add(buttonDom)
     this.container.add(this.titleText)
     this.container.add(this.tempoText)
     this.container.add(this.bpmText)
-    this.container.add(searchInputDom)
-    this.container.add(searchingYoutubeText)
     this.container.setVisible(false)
   }
 
@@ -144,7 +96,7 @@ export class SongSelect {
       if (songList[i]) {
         const song = songList[i]
         const songText = this.game.add
-          .text(0, y, song.name)
+          .text(40, y, song.name)
           .setStyle({
             fontSize: '20px',
             fontFamily: DEFAULT_FONT,
@@ -152,7 +104,7 @@ export class SongSelect {
           .setInteractive({ useHandCursor: true })
           .on('pointerdown', () => {
             this.hide()
-            this.game.selectSong(song.link, song.delay)
+            this.game.selectSong(song.link)
           })
           .setDepth(SORT_ORDER.top + 100)
         this.songOptions.push(songText)

@@ -14,6 +14,7 @@ export interface PlayerConfig {
     x: number
     y: number
   }
+  hideHealthBar?: boolean
 }
 
 export class Player {
@@ -42,16 +43,16 @@ export class Player {
 
   constructor(game: Game, config: PlayerConfig) {
     this.game = game
-    const { position } = config
+    const { position, hideHealthBar } = config
     this.sprite = game.add.sprite(position.x, position.y, 'player-windup-left')
     this.sprite.setScale(0.75)
     this.sprite.setDepth(SORT_ORDER.player)
 
     this.initKeyPressListener()
-    this.setupHealthbar()
+    this.setupHealthbar(hideHealthBar)
   }
 
-  setupHealthbar() {
+  setupHealthbar(hideHealthBar: boolean | undefined) {
     this.healthBar = new Healthbar(
       this.game,
       {
@@ -65,6 +66,9 @@ export class Player {
     this.onDamaged.push(() => {
       this.healthBar.draw()
     })
+    if (hideHealthBar) {
+      this.healthBar.hide()
+    }
   }
 
   initKeyPressListener() {

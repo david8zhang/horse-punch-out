@@ -19,6 +19,7 @@ import { YouTubePlayer } from 'youtube-player/dist/types'
 // @ts-ignore
 import PlayerStates from 'youtube-player/dist/constants/PlayerStates'
 import { SongSelect } from '~/core/SongSelect'
+import { CustomSongMenu } from '~/core/CustomSongMenu'
 
 export enum AttackPhase {
   PLAYER,
@@ -32,12 +33,14 @@ export default class Game extends Phaser.Scene {
   public beatTracker!: BeatTracker
   public currAttackPhase: AttackPhase = AttackPhase.ENEMY
   public skipTutorial!: boolean
+  public isFreestyle: boolean = false
 
   // Embedded youtube video UI
   public youtubePlayer!: YouTubePlayer
   public isPlaying: boolean = false
   public selectedSong: string = ''
-  public songSelectMenu!: SongSelect
+  public songSelectMenu: SongSelect | null = null
+  public customSongMenu: CustomSongMenu | null = null
 
   public bpm = DEFAULT_BPM
 
@@ -64,16 +67,20 @@ export default class Game extends Phaser.Scene {
       this.selectedSong = data.selectedSong
       this.youtubePlayer = data.youtubePlayer
       this.skipTutorial = data.skipTutorial ?? false
+      this.isFreestyle = data.isFreestyle
     }
     this.bpm = DEFAULT_BPM
   }
 
-  selectSong(songLink: string, delay: number) {
+  selectSong(songLink: string, bpm?: number) {
+    if (bpm) {
+      this.bpm = bpm
+    }
     this.beatTracker.hide()
     const url = new URL(songLink)
     if (url.searchParams.get('v')) {
       const youtubeSongId = url.searchParams.get('v') as string
-      this.youtubePlayer.loadVideoById(youtubeSongId, delay)
+      this.youtubePlayer.loadVideoById(youtubeSongId)
       this.youtubePlayer.stopVideo()
       this.youtubePlayer.playVideo()
     }
@@ -85,6 +92,9 @@ export default class Game extends Phaser.Scene {
       if (event.data === PlayerStates.PLAYING && !this.isPlaying) {
         this.isPlaying = true
         this.restart()
+      }
+      if (event.data === PlayerStates.ENDED) {
+        this.handleDefeatedEnemy()
       }
     })
   }
@@ -147,8 +157,12 @@ export default class Game extends Phaser.Scene {
       this.victoryText.x - this.victoryText.displayWidth / 2,
       this.victoryText.y
     )
-    this.songSelectMenu = new SongSelect(this, this.bpm)
-    this.songSelectMenu.showSongListForBPM(this.bpm)
+    if (this.isFreestyle) {
+      this.customSongMenu = new CustomSongMenu(this)
+    } else {
+      this.songSelectMenu = new SongSelect(this, this.bpm)
+      this.songSelectMenu.showSongListForBPM(this.bpm)
+    }
     if (!this.youtubePlayer) {
       this.createYoutubePlayer()
     }
@@ -165,6 +179,7 @@ export default class Game extends Phaser.Scene {
         x: WINDOW_WIDTH / 2,
         y: WINDOW_HEIGHT - 325,
       },
+      hideHealthBar: this.isFreestyle,
     })
     this.enemy.onDied.push(this.handleDefeatedEnemy.bind(this))
     this.enemy.onPunch.push(this.player.handleEnemyPunch.bind(this.player))
@@ -305,7 +320,9 @@ export default class Game extends Phaser.Scene {
     playerPunchDirection: Direction
   ) {
     this.cameras.main.shake(150, 0.005)
-    const damageToDeal = PLAYER_DAMAGE_MAPPING[beatQuality]
+    const damageToDeal = this.isFreestyle
+      ? 0
+      : PLAYER_DAMAGE_MAPPING[beatQuality]
     this.enemy.takeDamage(damageToDeal, playerPunchDirection)
 
     const beatQualityText = this.add
@@ -349,6 +366,7 @@ export default class Game extends Phaser.Scene {
     this.currPlayerActions = -3
     this.scene.start('gameover', {
       youtubePlayer: this.youtubePlayer,
+      isFreestyle: this.isFreestyle,
     })
   }
 
@@ -391,7 +409,11 @@ export default class Game extends Phaser.Scene {
       if (this.bpm < 130) {
         this.bpm += 10
       }
-      this.songSelectMenu.showSongListForBPM(this.bpm)
+      if (this.songSelectMenu) {
+        this.songSelectMenu.showSongListForBPM(this.bpm)
+      } else if (this.customSongMenu) {
+        this.customSongMenu.show()
+      }
       this.enemy.setMaxHealth(Math.round(this.enemy.maxHealth * 1.5))
       this.enemy.reset()
     })

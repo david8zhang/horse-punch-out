@@ -16,6 +16,7 @@ export class Healthbar {
   private bar: Phaser.GameObjects.Graphics
   private entity: { health: number; maxHealth: number }
   private config: HealthbarConfig
+  private heartIcon: Phaser.GameObjects.Image
 
   constructor(
     scene: Game,
@@ -32,11 +33,21 @@ export class Healthbar {
     this.scene.add.existing(this.bar)
     this.draw()
 
-    this.scene.add
+    this.heartIcon = this.scene.add
       .image(this.config.position.x + 10, this.config.position.y + 8, 'heart')
       .setTintFill(0xff0000)
       .setScale(0.5)
       .setDepth(SORT_ORDER.ui)
+  }
+
+  hide() {
+    this.bar.setVisible(false)
+    this.heartIcon.setVisible(false)
+  }
+
+  show() {
+    this.bar.setVisible(true)
+    this.heartIcon.setVisible(true)
   }
 
   draw(): void {

@@ -4,7 +4,7 @@ import { DEFAULT_FONT, WINDOW_HEIGHT, WINDOW_WIDTH } from '~/core/constants'
 import { YouTubePlayer } from 'youtube-player/dist/types'
 
 export default class GameOver extends Phaser.Scene {
-  private score = 0
+  private isFreestyle: boolean = false
   public youtubePlayer!: YouTubePlayer
 
   constructor() {
@@ -12,8 +12,8 @@ export default class GameOver extends Phaser.Scene {
   }
 
   init(data): void {
-    if (data.score) {
-      this.score = data.score
+    if (data.isFreestyle) {
+      this.isFreestyle = data.isFreestyle
     }
     if (data.youtubePlayer) {
       this.youtubePlayer = data.youtubePlayer
@@ -49,6 +49,7 @@ export default class GameOver extends Phaser.Scene {
         this.scene.start('game', {
           youtubePlayer: this.youtubePlayer,
           skipTutorial: true,
+          isFreestyle: this.isFreestyle,
         })
       })
     domElementsContainer.add(restartButtonDom)

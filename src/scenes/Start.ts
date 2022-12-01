@@ -23,11 +23,11 @@ export class Start extends Phaser.Scene {
       titleText.x - titleText.displayWidth / 2,
       WINDOW_HEIGHT * 0.4
     )
-    const startButton = button('Start', {
+    const startButton = button('Play', {
       fontSize: '20px',
       color: 'black',
       fontFamily: DEFAULT_FONT,
-      width: 150,
+      width: 180,
       height: 40,
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -37,11 +37,31 @@ export class Start extends Phaser.Scene {
     }) as HTMLElement
 
     const startButtonDOM = this.add
-      .dom(this.scale.width / 2, this.scale.height / 2 + 40, startButton)
+      .dom(this.scale.width / 2 - 95, this.scale.height / 2 + 40, startButton)
       .setOrigin(0.5)
       .addListener('click')
       .on('click', () => {
-        this.scene.start('game')
+        this.scene.start('cutscene')
+      })
+
+    const customSong = button('Freestyle', {
+      fontSize: '20px',
+      color: 'black',
+      fontFamily: DEFAULT_FONT,
+      width: 180,
+      height: 40,
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      borderColor: 'black',
+      borderRadius: '10px',
+      cursor: 'pointer',
+    }) as HTMLElement
+    const customSongButtonDOM = this.add
+      .dom(this.scale.width / 2 + 95, this.scale.height / 2 + 40, customSong)
+      .setOrigin(0.5)
+      .addListener('click')
+      .on('click', () => {
+        this.scene.start('game', { skipTutorial: true, isFreestyle: true })
       })
   }
 }

@@ -29,92 +29,52 @@ export const PLAYER_DAMAGE_MAPPING = {
 export const ENEMY_DAMAGE = 25
 
 export const MUSIC_BPM_MAPPING = {
-  60: [
-    {
-      name: 'Tik Tok - Ke$ha',
-      link: 'https://www.youtube.com/watch?v=OF04pKp-r9o',
-    },
-    {
-      name: 'Call Me Maybe - Carly Rae Jepsen',
-      link: 'https://www.youtube.com/watch?v=FUVwhKsfHiE',
-    },
-    {
-      name: "It's My Life - Bon Jovi",
-      link: 'https://www.youtube.com/watch?v=ZXfLxqsNO4s',
-    },
-  ],
   100: [
     {
-      name: 'Unwritten - Natasha Bedingfield',
-      link: 'https://www.youtube.com/watch?v=vRQb_-mRcAc&ab_channel=7clouds',
+      name: 'Moombahton Trap',
+      link: 'https://www.youtube.com/watch?v=Udq3RjCNfsY',
     },
     {
-      name: "Hips Don't Lie - Shakira feat. Wycleaf Jean",
-      link: 'https://www.youtube.com/watch?v=JDjunuWB3Jo&ab_channel=PizzaMusic',
-    },
-    {
-      name: 'Man in the Mirror - Michael Jackson',
-      link: 'https://www.youtube.com/watch?v=Z9NYDgbKsBE',
+      name: 'Techno Beats',
+      link: 'https://www.youtube.com/watch?v=bFK46JkMhjI',
     },
   ],
   110: [
     {
-      name: 'Hollaback Girl - Gwen Stefani',
-      link: 'https://www.youtube.com/watch?v=_jAAixDgHhM',
+      name: 'Under the Shade',
+      link: 'https://www.youtube.com/watch?v=kk1dphZU0cc',
     },
     {
-      name: 'Wannabe - Spice Girls',
-      link: 'https://www.youtube.com/watch?v=HNehiNC_tq0',
-      delay: 4,
-    },
-    {
-      name: 'Another One Bites the Dust - Queen',
-      link: 'https://www.youtube.com/watch?v=kwwaWVP2PGE',
-      delay: 1,
+      name: 'Melodic Techno Rock',
+      link: 'https://www.youtube.com/watch?v=sY9h95OzH2U',
     },
   ],
   120: [
     {
-      name: 'Tik Tok - Ke$ha',
-      link: 'https://www.youtube.com/watch?v=OF04pKp-r9o',
+      name: 'Exciting Mood',
+      link: 'https://www.youtube.com/watch?v=MP9MFdK2rUg',
     },
     {
-      name: 'Call Me Maybe - Carly Rae Jepsen',
-      link: 'https://www.youtube.com/watch?v=FUVwhKsfHiE',
+      name: 'Dance',
+      link: 'https://www.youtube.com/watch?v=c65IzrEM8PE',
     },
     {
-      name: "It's My Life - Bon Jovi",
-      link: 'https://www.youtube.com/watch?v=ZXfLxqsNO4s',
-    },
-    {
-      name: 'Dynamite - Taio Cruz',
-      link: 'https://www.youtube.com/watch?v=2JUNnKmZhqA',
-    },
-    {
-      name: 'Forever - Chris Brown',
-      link: 'https://www.youtube.com/watch?v=-s6dlaOrnIg',
-    },
-    {
-      name: "Don't Cha - Pussycat Dolls",
-      link: 'https://www.youtube.com/watch?v=5w-lMYTc7fU',
+      name: 'Rock Beat',
+      link: 'https://www.youtube.com/watch?v=OJXZTMpvgus',
     },
   ],
   130: [
     {
-      name: 'On The Floor - Jennifer Lopez',
-      link: 'https://www.youtube.com/watch?v=70XspGKI8kQ',
+      name: 'Uptempo Beats',
+      link: 'https://www.youtube.com/watch?v=MvSMBdCxT8I',
     },
     {
-      name: 'Pumped Up Kicks - Foster The People',
-      link: 'https://www.youtube.com/watch?v=k_aQYP8rsgE',
+      name: 'Fairy Tale',
+      link: 'https://www.youtube.com/watch?v=b2WX_O1YwHk',
     },
     {
-      name: 'Party Rock Anthem - LMFAO',
-      link: 'https://www.youtube.com/watch?v=zIh5AHxh-Ok',
-    },
-    {
-      name: 'Timber - Pitbull ft. Kesha',
-      link: 'https://www.youtube.com/watch?v=zHESy8XsJPs',
+      name: 'Zumba Zumba',
+      link: 'https://www.youtube.com/watch?v=Qv11UYhq2j0',
     },
   ],
 }
